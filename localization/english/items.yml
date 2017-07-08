@@ -1800,3 +1800,17 @@ DOTA_Tooltip_modifier_item_bloodthorn_arena_silence: Bloodthorn 2
 DOTA_Tooltip_modifier_item_bloodthorn_arena_silence_Description: |-
   Silenced and taking increased damage, dealt at the end of the duration of the debuff as magic damage.
   Causes all incoming attacks to crit for %dMODIFIER_PROPERTY_TOOLTIP%%% damage.
+
+DOTA_Tooltip_ability_item_bracer_of_chaos: Bracer of Chaos
+DOTA_Tooltip_ability_item_bracer_of_chaos_Description: |-
+ Activated: Reduces the physical armor of the target by %armor_reduction_pct%%% and magic resistance on %resist_reduction_pct%%% by %discrease_duration% seconds.
+ Passive: Cold Attack - each attack slows the movement speed and attack of the target on %slow_duration% seconds.
+DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_all_stats: +$all
+DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_health: +$health
+DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_mana: +$mana 
+DOTA_Tooltip_ability_item_bracer_of_chaos_movement_slow_pct: '%MOVEMENT SPEED SLOW:'
+DOTA_Tooltip_ability_item_bracer_of_chaos_attack_speed_slow: 'ATTACK SPEED SLOW'
+DOTA_Tooltip_modifier_item_bracer_of_chaos_slow: Bracer of Chaos Cold Attack
+DOTA_Tooltip_modifier_item_bracer_of_chaos_slow_Description: 'Movement speed discreased by %dMODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE%%%, attack speed descreased by %dMODIFIER_PROPERTY_ATTACKSPEED_BONUS_CONSTANT%.'
+DOTA_Tooltip_modifier_item_bracer_of_chaos_resist_discrease: Bracer of Chaos
+DOTA_Tooltip_modifier_item_bracer_of_chaos_resist_discrease_Description: 'Armor descreased by %dMODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS%, resistange descreased by %dMODIFIER_PROPERTY_MAGICAL_RESISTANCE_BONUS%%%.'
