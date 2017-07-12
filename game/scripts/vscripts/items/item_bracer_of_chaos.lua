@@ -40,13 +40,13 @@ function modifier_item_bracer_of_chaos:GetModifierManaBonus()
 	return self:GetAbility():GetSpecialValueFor("bonus_mana")
 end
 function modifier_item_bracer_of_chaos:GetModifierBonusStats_Strength()
-	return self:GetAbility():GetSpecialValueFor("all")
+	return self:GetAbility():GetSpecialValueFor("bonus_all_stats")
 end
 function modifier_item_bracer_of_chaos:GetModifierBonusStats_Agility()
-	return self:GetAbility():GetSpecialValueFor("all")
+	return self:GetAbility():GetSpecialValueFor("bonus_all_stats")
 end
 function modifier_item_bracer_of_chaos:GetModifierBonusStats_Intellect()
-	return self:GetAbility():GetSpecialValueFor("all")
+	return self:GetAbility():GetSpecialValueFor("bonus_all_stats")
 end
 
 modifier_item_bracer_of_chaos_resist_discrease = class({
@@ -66,7 +66,7 @@ function modifier_item_bracer_of_chaos_resist_discrease:OnCreated()
 	self.ArmorReduction = self:GetAbility():GetSpecialValueFor("armor_reduction_pct") * self:GetParent():GetPhysicalArmorValue() * 0.01
 end
 
-function modifier_item_bracer_of_chaos_resist_discrease:GetModifierPhysicalArmorBonus()
+function modifier_item_bracer_of_chaos_resist_discrease:GetModifierPhysicalArmorBonus() 
 	return self.ArmorReduction
 end
 
