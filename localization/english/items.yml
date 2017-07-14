@@ -1825,14 +1825,19 @@ DOTA_Tooltip_modifier_item_runic_mekansm_effect_Description: Regenerating %dMODI
 
 DOTA_Tooltip_ability_item_bracer_of_chaos: Bracer of Chaos
 DOTA_Tooltip_ability_item_bracer_of_chaos_Description: |-
- Activated: Reduces the physical armor of the target by %armor_reduction_pct%%% and magic resistance on %resist_reduction_pct%%% by %discrease_duration% seconds.
- Passive: Cold Attack - each attack slows the movement speed and attack of the target on %slow_duration% seconds.
+ Active: Reduces target's physical armor by %armor_reduction_pct%%% and magic damage resistance by %resist_reduction_pct%%% for %debuff_duration% seconds.
+ Passive: Cold Attack - Each attack slows the movement and attack speed of the target for %slow_duration% seconds.
+DOTA_Tooltip_ability_item_bracer_of_chaos_Note0: Cold Attack not slows bosses
 DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_all_stats: +$all
 DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_health: +$health
 DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_mana: +$mana
+DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_damage: +$damage
+DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_attack_range: 'BONUS ATTACK RANGE:'
+DOTA_Tooltip_ability_item_bracer_of_chaos_armor_reduction_pct: '%ARMOR REDUCTION:'
+DOTA_Tooltip_ability_item_bracer_of_chaos_resist_reduction_pct: '%MAGIC DAMAGE RESISTANCE REDUCTION:'
 DOTA_Tooltip_ability_item_bracer_of_chaos_movement_slow_pct: '%MOVEMENT SPEED SLOW:'
-DOTA_Tooltip_ability_item_bracer_of_chaos_attack_speed_slow: 'ATTACK SPEED SLOW'
+DOTA_Tooltip_ability_item_bracer_of_chaos_attack_speed_slow: 'ATTACK SPEED SLOW:'
 DOTA_Tooltip_modifier_item_bracer_of_chaos_slow: Bracer of Chaos Cold Attack
-DOTA_Tooltip_modifier_item_bracer_of_chaos_slow_Description: 'Movement speed discreased by %dMODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE%%%, attack speed descreased by %dMODIFIER_PROPERTY_ATTACKSPEED_BONUS_CONSTANT%.'
-DOTA_Tooltip_modifier_item_bracer_of_chaos_resist_discrease: Bracer of Chaos
-DOTA_Tooltip_modifier_item_bracer_of_chaos_resist_discrease_Description: 'Armor descreased by %dMODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS%, resistange descreased by %dMODIFIER_PROPERTY_MAGICAL_RESISTANCE_BONUS%%%.'
+DOTA_Tooltip_modifier_item_bracer_of_chaos_slow_Description: 'Movement speed reduced by %dMODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE%%%, attack speed reduced by %dMODIFIER_PROPERTY_ATTACKSPEED_BONUS_CONSTANT%.'
+DOTA_Tooltip_modifier_item_bracer_of_chaos_debuff: Bracer of Chaos
+DOTA_Tooltip_modifier_item_bracer_of_chaos_debuff_Description: 'Armor reduced by %dMODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS%, magic damage resistance reduced by %dMODIFIER_PROPERTY_MAGICAL_RESISTANCE_BONUS%%%.'

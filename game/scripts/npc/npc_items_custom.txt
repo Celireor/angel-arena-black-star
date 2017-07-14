@@ -10509,6 +10509,7 @@
 			}
 		}
 	}
+
 	"item_recipe_bracer_of_chaos"
 	{
 		"BaseClass"						"item_datadriven"
@@ -10524,6 +10525,7 @@
 			"01"						"item_dark_blade;item_demons_paw;item_soul_of_titan;item_skadi_8;item_skadi_8"
 		}
 	}
+
 	"item_bracer_of_chaos"
 	{
 		"BaseClass"						"item_lua"
@@ -10543,47 +10545,57 @@
 			"01"
 			{
 				"var_type"				"FIELD_INTEGER"
-				"bonus_health"			"4000"
+				"bonus_all_stats"		"400"
 			}
 			"02"
 			{
 				"var_type"				"FIELD_INTEGER"
-				"bonus_mana"			"4400"	
+				"bonus_health"			"4000"
 			}
 			"03"
 			{
 				"var_type"				"FIELD_INTEGER"
-				"bonus_all_stats"		"400"
+				"bonus_mana"			"4400"
 			}
 			"04"
 			{
-				"var_type"				"FIELD_FLOAT"
-				"armor_reduction_pct"	"-100.0"
+				"var_type"				"FIELD_INTEGER"
+				"bonus_damage"			"240"
 			}
 			"05"
 			{
-				"var_type"				"FIELD_FLOAT"
-				"resist_reduction_pct"	"-50"
+				"var_type"				"FIELD_INTEGER"
+				"bonus_attack_range"	"50"
 			}
 			"06"
 			{
-				"var_type"				"FIELD_FLOAT"
-				"discrease_duration"	"4.0"
+				"var_type"				"FIELD_INTEGER"
+				"armor_reduction_pct"	"-100"
 			}
 			"07"
 			{
 				"var_type"				"FIELD_INTEGER"
-				"movement_slow_pct"		"50"
+				"resist_reduction_pct"	"-50"
 			}
 			"08"
 			{
-				"var_type"				"FIELD_INTEGER"
-				"attack_speed_slow"		"150"		
+				"var_type"				"FIELD_FLOAT"
+				"debuff_duration"		"4"
 			}
 			"09"
 			{
+				"var_type"				"FIELD_INTEGER"
+				"movement_slow_pct"		"-50"
+			}
+			"10"
+			{
+				"var_type"				"FIELD_INTEGER"
+				"attack_speed_slow"		"-150"
+			}
+			"11"
+			{
 				"var_type"				"FIELD_FLOAT"
-				"slow_duration"			"3.0"
+				"slow_duration"			"3"
 			}
 		}
 	}

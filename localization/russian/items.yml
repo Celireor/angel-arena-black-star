@@ -1457,14 +1457,18 @@ DOTA_Tooltip_modifier_item_runic_mekansm_effect_Description: Восстанов�
 
 DOTA_Tooltip_ability_item_bracer_of_chaos: Bracer of Chaos
 DOTA_Tooltip_ability_item_bracer_of_chaos_Description: |-
- Активируемая: Уменьшает физическую броню цели на %armor_reduction_pct%%% и магическое сопротивление на %resist_reduction_pct%%% на %discrease_duration% секунды.
+ Активируемая: Уменьшает физическую броню цели на %armor_reduction_pct%%% и сопротивление магическому урону на %resist_reduction_pct%%% на %debuff_duration% секунды.
  Пассивная: Cold Attack — каждая атака замедляет скорость передвижения и атаки цели на %slow_duration% секунды.
+DOTA_Tooltip_ability_item_bracer_of_chaos_Note0: Cold Attack не замедляет боссов
 DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_all_stats: +$all
 DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_health: +$health
 DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_mana: +$mana
+DOTA_Tooltip_ability_item_bracer_of_chaos_bonus_attack_range: 'ДОП. РАДИУС АТАКИ:'
+DOTA_Tooltip_ability_item_bracer_of_chaos_armor_reduction_pct: '%СНИЖЕНИЕ БРОНИ:'
+DOTA_Tooltip_ability_item_bracer_of_chaos_resist_reduction_pct: '%УМЕНЬШЕНИЕ СОПР. МАГ. УРОНУ:'
 DOTA_Tooltip_ability_item_bracer_of_chaos_movement_slow_pct: '%ЗАМЕДЛЕНИЕ ПЕРЕДВИЖЕНИЯ:'
 DOTA_Tooltip_ability_item_bracer_of_chaos_attack_speed_slow: 'ЗАМЕДЛЕНИЕ АТАКИ:'
 DOTA_Tooltip_modifier_item_bracer_of_chaos_slow: Bracer of Chaos Cold Attack
 DOTA_Tooltip_modifier_item_bracer_of_chaos_slow_Description: 'Скорость передвижения уменьшена на %dMODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE%%%, скорость атаки уменьшена на %dMODIFIER_PROPERTY_ATTACKSPEED_BONUS_CONSTANT%.'
-DOTA_Tooltip_modifier_item_bracer_of_chaos_resist_discrease: Bracer of Chaos
-DOTA_Tooltip_modifier_item_bracer_of_chaos_resist_discrease_Description: 'Броня снижена на %dMODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS%, магическое сопротивление снижено на %dMODIFIER_PROPERTY_MAGICAL_RESISTANCE_BONUS%%%.'
+DOTA_Tooltip_modifier_item_bracer_of_chaos_debuff: Bracer of Chaos
+DOTA_Tooltip_modifier_item_bracer_of_chaos_debuff_Description: 'Броня уменьшена на %dMODIFIER_PROPERTY_PHYSICAL_ARMOR_BONUS%, сопротивление магическому урону уменьшено на %dMODIFIER_PROPERTY_MAGICAL_RESISTANCE_BONUS%%%.'
