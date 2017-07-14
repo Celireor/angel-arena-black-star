@@ -10570,12 +10570,12 @@
 			"06"
 			{
 				"var_type"				"FIELD_INTEGER"
-				"armor_reduction_pct"	"-100"
+				"armor_reduction_pct"	"100"
 			}
 			"07"
 			{
 				"var_type"				"FIELD_INTEGER"
-				"resist_reduction_pct"	"-50"
+				"resist_reduction_pct"	"50"
 			}
 			"08"
 			{

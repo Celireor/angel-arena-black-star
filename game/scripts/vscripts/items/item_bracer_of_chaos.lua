@@ -100,25 +100,21 @@ function modifier_item_bracer_of_chaos_debuff:DeclareFunctions()
 end
 
 function modifier_item_bracer_of_chaos_debuff:OnCreated()
-	local ability = self:GetAbility()
-	self.ArmorReduction = 0
-	self.armor_reduction_mult = ability:GetSpecialValueFor("armor_reduction_pct") * 0.01
-	self.resist_reduction_pct = ability:GetSpecialValueFor("resist_reduction_pct")
-
 	self:StartIntervalThink(0.1)
 	self:OnIntervalThink()
 end
 
 function modifier_item_bracer_of_chaos_debuff:OnIntervalThink()
-	self.ArmorReduction = (self:GetParent():GetPhysicalArmorValue() - self.ArmorReduction) * self.armor_reduction_mult
+	local disarmor = Attributes:GetTotalGrantedArmor(self:GetParent()) * self:GetAbility():GetSpecialValueFor("armor_reduction_pct") * 0.01
+	self:SetStackCount(disarmor)
 end
 
 function modifier_item_bracer_of_chaos_debuff:GetModifierPhysicalArmorBonus()
-	return self.ArmorReduction
+	return -self:GetStackCount()
 end
 
 function modifier_item_bracer_of_chaos_debuff:GetModifierMagicalResistanceBonus()
-	return self.resist_reduction_pct
+	return self:GetAbility():GetSpecialValueFor("resist_reduction_pct")
 end
 
 
