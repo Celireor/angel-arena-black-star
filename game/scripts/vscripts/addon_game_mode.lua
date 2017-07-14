@@ -58,6 +58,7 @@ function Precache(context)
 		"particles/econ/events/ti7/shivas_guard_active_ti7.vpcf",
 		"particles/econ/events/ti7/shivas_guard_impact_ti7.vpcf",
 		"particles/econ/events/ti7/shivas_guard_slow.vpcf",
+		"particles/arena/items_fx/bracer_of_chaos_projectile.vpcf",
 		--Heroes
 		"particles/units/heroes/hero_legion_commander/legion_commander_press.vpcf",
 		"particles/econ/items/legion/legion_fallen/legion_fallen_press_a.vpcf",

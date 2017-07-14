@@ -124,6 +124,10 @@ ATTACK_MODIFIERS = {
 		projectile = "particles/arena/items_fx/desolator5_projectile.vpcf",
 	},
 	{
+		modifier = "modifier_item_bracer_of_chaos",
+		projectile = "particles/arena/items_fx/bracer_of_chaos_projectile.vpcf",
+	},
+	{
 		modifier = "modifier_item_desolator6_arena",
 		projectile = "particles/arena/items_fx/desolator6_projectile.vpcf",
 	},
