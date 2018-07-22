@@ -281,7 +281,43 @@ function GameMode:ModifyExperienceFilter(filterTable)
 end
 
 function GameMode:ItemAddedToInventoryFilter(filterTable)
+  
 	local item = EntIndexToHScript(filterTable.item_entindex_const)
+	--Send info to panorama shops
+	if not item.isNotNew then
+		item.isNotNew = true
+		local abilityName = item:GetAbilityName()
+		local owner = item:GetPurchaser()
+		local isStackable = item:IsStackable()
+		if owner then
+			local ownerIndex = owner:GetEntityIndex()
+			local args = {frameDelay = 2, args = {item = filterTable.item_entindex_const, itemName = abilityName, owner = ownerIndex, stackable = isStackable}}
+			Timers:CreateTimer(0, GameMode.SendArenaNewItem, args)
+		end
+	end
+	if item.suggested_slot then
+		filterTable.suggested_slot = item.suggested_slot
+	end
+	
+	return true
+end
+
+function GameMode.SendArenaNewItem(args)
+	if (args.frameDelay > 0) then
+		args.frameDelay = args.frameDelay - 1
+		return 0
+	else
+		local passedArgs = args.args
+		local item = EntIndexToHScript(passedArgs.item)
+		if (item) then
+			passedArgs.isDropped = item:GetContainer() ~= nil
+		else
+			passedArgs.isDropped = false;
+		end
+		CustomGameEventManager:Send_ServerToAllClients("arena_new_item", passedArgs)
+	end
+end
+
 	if item.suggested_slot then
 		filterTable.suggested_slot = item.suggested_slot
 	end
