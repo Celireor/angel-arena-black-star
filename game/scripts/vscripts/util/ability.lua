@@ -17,7 +17,7 @@ function CDOTABaseAbility:PreformPrecastActions(unit)
 end
 
 function CDOTABaseAbility:IsAbilityMulticastable()
-	return not ability:HasBehavior(DOTA_ABILITY_BEHAVIOR_PASSIVE) and not table.contains(NOT_MULTICASTABLE_ABILITIES, self:GetAbilityName())
+	return not self:HasBehavior(DOTA_ABILITY_BEHAVIOR_PASSIVE) and not table.contains(NOT_MULTICASTABLE_ABILITIES, self:GetAbilityName())
 end
 
 function CDOTABaseAbility:ClearFalseInnateModifiers()
