@@ -16,8 +16,15 @@ function CDOTABaseAbility:PreformPrecastActions(unit)
 	return PreformAbilityPrecastActions(unit or self:GetCaster(), self)
 end
 
-function CDOTABaseAbility:IsAbilityMulticastable()
-	return not self:HasBehavior(DOTA_ABILITY_BEHAVIOR_PASSIVE) and not table.contains(NOT_MULTICASTABLE_ABILITIES, self:GetAbilityName())
+function CDOTABaseAbility:GetMulticastType()
+	-- false = Cannot multicast
+	-- 1 = fireblast behavior (cast on same) (default)
+	-- 2 = ignite behavior (cast on different)
+	-- 3 = bloodlust behavior (instant cast)
+	if not self:HasBehavior(DOTA_ABILITY_BEHAVIOR_PASSIVE) and not table.contains(NOT_MULTICASTABLE_ABILITIES, self:GetAbilityName()) then
+		return MULTICAST_TYPE[self:GetAbilityName()] or 1
+	end
+	return false
 end
 
 function CDOTABaseAbility:ClearFalseInnateModifiers()
