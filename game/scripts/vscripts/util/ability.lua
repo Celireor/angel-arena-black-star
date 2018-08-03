@@ -17,7 +17,7 @@ function CDOTABaseAbility:PreformPrecastActions(unit)
 end
 
 local MULTICAST_TYPE = {
-	"terrorblade_conjure_image" = 3
+	terrorblade_conjure_image = 3
 }
 
 function CDOTABaseAbility:GetMulticastType()
