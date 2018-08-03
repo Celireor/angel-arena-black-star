@@ -22,7 +22,7 @@ function CDOTABaseAbility:GetMulticastType()
 	-- 2 = ignite behavior (cast on different)
 	-- 3 = bloodlust behavior (instant cast)
 	if not self:HasBehavior(DOTA_ABILITY_BEHAVIOR_PASSIVE) and not table.contains(NOT_MULTICASTABLE_ABILITIES, self:GetAbilityName()) then
-		return MULTICAST_TYPE[self:GetAbilityName()] or 1
+		return MULTICAST_TYPE[self:GetAbilityName()] or 2
 	end
 	return false
 end
