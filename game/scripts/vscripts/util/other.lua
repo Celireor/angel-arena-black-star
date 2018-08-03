@@ -168,6 +168,8 @@ function CastMulticastedSpell(caster, ability, target, multicasts, delay, prt, p
 				CastMulticastedSpell(caster, ability, target, multicasts - 1, delay, prt, prtNumber + 1)
 			end
 		end)
+	else
+		ParticleManager:ReleaseParticleIndex(prt)
 	end
 end
 
