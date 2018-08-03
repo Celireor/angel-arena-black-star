@@ -18,6 +18,7 @@ end
 
 local MULTICAST_TYPE = {
 	terrorblade_conjure_image = 3
+	magnataur_empower = 3
 	oracle_purifying_flames = 1
 }
 
