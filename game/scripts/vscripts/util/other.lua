@@ -225,11 +225,12 @@ function CastAdditionalAbility(caster, ability, target)
 			unit:SetCursorCastTarget(target)
 		end
 	elseif skill:HasBehavior(DOTA_ABILITY_BEHAVIOR_POINT) then
-		if target and target.x and target.y and target.z then
-			unit:SetCursorPosition(target)
-		end
-		if target and target.GetOrigin then
-			unit:SetCursorPosition(target:GetOrigin())
+		if target then
+			if target.x and target.y and target.z then
+				unit:SetCursorPosition(target)
+			elseif target.GetOrigin then
+				unit:SetCursorPosition(target:GetOrigin())
+			end
 		end
 	end
 	skill:OnSpellStart()
