@@ -16,16 +16,19 @@ function CDOTABaseAbility:PreformPrecastActions(unit)
 	return PreformAbilityPrecastActions(unit or self:GetCaster(), self)
 end
 
+--not set in stone, are just examples
 local MULTICAST_TYPE = {
 	terrorblade_conjure_image = 3
+	terrorblade_reflection = 3
 	magnataur_empower = 3
 	oracle_purifying_flames = 1
+	vengefulspirit_magic_missile = 1
 }
 
 function CDOTABaseAbility:GetMulticastType()
 	-- false = Cannot multicast
-	-- 1 = fireblast behavior (cast on same) (default)
-	-- 2 = ignite behavior (cast on different)
+	-- 1 = fireblast behavior (cast on same)
+	-- 2 = ignite behavior (cast on different) (default)
 	-- 3 = bloodlust behavior (instant cast)
 	if not self:HasBehavior(DOTA_ABILITY_BEHAVIOR_PASSIVE) and not table.contains(NOT_MULTICASTABLE_ABILITIES, self:GetAbilityName()) then
 		return MULTICAST_TYPE[self:GetAbilityName()] or 2
