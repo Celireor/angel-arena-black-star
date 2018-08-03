@@ -16,6 +16,10 @@ function CDOTABaseAbility:PreformPrecastActions(unit)
 	return PreformAbilityPrecastActions(unit or self:GetCaster(), self)
 end
 
+local MULTICAST_TYPE = {
+	"terrorblade_conjure_image" = 3
+}
+
 function CDOTABaseAbility:GetMulticastType()
 	-- false = Cannot multicast
 	-- 1 = fireblast behavior (cast on same) (default)
