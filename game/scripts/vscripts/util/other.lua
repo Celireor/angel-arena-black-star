@@ -145,27 +145,43 @@ function ReplaceAbilities(unit, oldAbility, newAbility, keepLevel, keepCooldown)
 end
 
 function PreformMulticast(caster, ability_cast, multicast, multicast_delay, target)
-	if ability_cast:IsAbilityMulticastable() then
+	local multicast_type = ability_cast:GetMulticastType()
+	if multicast_type then
 		local prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
 		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
 		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
 		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_c.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
 		--ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
-		CastMulticastedSpell(caster, ability_cast, target, multicast-1, multicast_delay, prt, 2)
+		CastMulticastedSpell(caster, ability_cast, target, multicast-1, multicast_type, multicast_delay, prt, 2)
 	end
 end
 
-function CastMulticastedSpell(caster, ability, target, multicasts, delay, prt, prtNumber)
+function CastMulticastedSpell(caster, ability, target, multicasts, multicast_type, delay, prt, prtNumber)
 	if multicasts >= 1 then
 		Timers:CreateTimer(delay, function()
 			ParticleManager:DestroyParticle(prt, true)
 			ParticleManager:ReleaseParticleIndex(prt)
 			prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
 			ParticleManager:SetParticleControl(prt, 1, Vector(prtNumber, 0, 0))
-			CastAdditionalAbility(caster, ability, target)
+			if multicast_type == 1 then
+				CastAdditionalAbility(caster, ability, target)
+			else
+				local cast_range = ability:GetCastRange()
+				local abilityTarget = ability:GetAbilityTargetTeam()
+				if abilityTarget == 0 then abilityTarget = DOTA_UNIT_TARGET_TEAM_ENEMY end
+				local abilityTargetType = ability:GetAbilityTargetTeam()
+				if abilityTargetType == 0 then abilityTargetType = DOTA_UNIT_TARGET_ALL end
+				local candidates = FindUnitsInRadius(caster:GetTeam(), caster:GetOrigin(), nil, ability:GetCastRange(), abilityTarget, abilityTargetType, ability:GetAbilityTargetFlags(), FIND_ANY_ORDER, false)
+				local Tier1 = {} --heroes
+				local Tier2 = {} --creeps and self
+				for k, v in pairs(candidates) do
+					if v:IsHero() and v ~= caster then Tier1[#Tier1 + 1] = v else Tier2[#Tier2 + 1] = v end
+				end
+				CastAdditionalAbility(caster, ability, Tier1[math.random(#Tier1)] or Tier2[math.random(#Tier2)] or target)
+			end
 			caster:EmitSound('Hero_OgreMagi.Fireblast.x'.. multicasts)
 			if multicasts >= 2 then
-				CastMulticastedSpell(caster, ability, target, multicasts - 1, delay, prt, prtNumber + 1)
+				CastMulticastedSpell(caster, ability, target, multicasts - 1, multicast_type, delay, prt, prtNumber + 1)
 			end
 		end)
 	else
@@ -211,6 +227,9 @@ function CastAdditionalAbility(caster, ability, target)
 	elseif skill:HasBehavior(DOTA_ABILITY_BEHAVIOR_POINT) then
 		if target and target.x and target.y and target.z then
 			unit:SetCursorPosition(target)
+		end
+		if target and target.GetOrigin then
+			unit:SetCursorPosition(target:GetOrigin())
 		end
 	end
 	skill:OnSpellStart()
