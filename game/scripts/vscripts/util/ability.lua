@@ -18,6 +18,7 @@ end
 
 local MULTICAST_TYPE = {
 	terrorblade_conjure_image = 3
+	oracle_purifying_flames = 1
 }
 
 function CDOTABaseAbility:GetMulticastType()
