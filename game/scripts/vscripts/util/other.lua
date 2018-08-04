@@ -171,7 +171,7 @@ end
 function GetMulticastFlags(caster, ability, multicast_type)
 	local rv = {}
 	if multicast_type ~= 1 then
-		rv.cast_range = ability:GetCastRange()
+		rv.cast_range = ability:GetCastRange(caster:GetOrigin(), caster)
 		local abilityTarget = ability:GetAbilityTargetTeam()
 		if abilityTarget == 0 then abilityTarget = DOTA_UNIT_TARGET_TEAM_ENEMY end
 		rv.abilityTarget = abilityTarget
@@ -180,14 +180,13 @@ function GetMulticastFlags(caster, ability, multicast_type)
 		elseif abilityTargetType == 2 and ability:HasBehavior(DOTA_ABILITY_BEHAVIOR_POINT) then abilityTargetType = 3 end
 		rv.abilityTargetType = abilityTargetType
 		rv.team = caster:GetTeam()
-		rv.castRange = ability:GetCastRange()
 		rv.targetFlags = ability:GetAbilityTargetFlags()
 	end
 	return rv
 end
 
 function CastMulticastedSpellInstantly(caster, ability, target, multicast_flag_data, multicast_casted_data)
-	local candidates = FindUnitsInRadius(multicast_flag_data.team, caster:GetOrigin(), nil, multicast_flag_data.castRange, multicast_flag_data.abilityTarget, multicast_flag_data.abilityTargetType, multicast_flag_data.targetFlags, FIND_ANY_ORDER, false)
+	local candidates = FindUnitsInRadius(multicast_flag_data.team, caster:GetOrigin(), nil, multicast_flag_data.cast_range, multicast_flag_data.abilityTarget, multicast_flag_data.abilityTargetType, multicast_flag_data.targetFlags, FIND_ANY_ORDER, false)
 	local Tier1 = {} --heroes
 	local Tier2 = {} --creeps and self
 	local Tier3 = {} --already casted
