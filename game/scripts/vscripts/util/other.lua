@@ -189,6 +189,12 @@ function CastAdditionalAbility(caster, ability, target, delay)
 		dummy:ModifyStrength (caster:GetStrength())
 		dummy:ModifyAgility(caster:GetAgility())
 		dummy:ModifyIntellect(caster:GetIntellect())
+		for _, v in pairs(caster:FindAllModifiers()) do
+			local buffName = v:GetName()
+			local buffAbility = v:GetAbility()
+			local dummyModifier = dummy:AddNewModifier(dummy, buffAbility, buffName, nil)
+			dummyModifierdummyModifier:SetStackCount(v:GetStackCount())
+		end
 		
 		skill = dummy:AddAbility(ability:GetName())
 		unit = dummy
