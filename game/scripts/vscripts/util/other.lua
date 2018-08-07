@@ -185,14 +185,14 @@ function GetMulticastFlags(caster, ability, multicast_type)
 	return rv
 end
 
-function CastMulticastedSpellInstantly(caster, ability, target, multicast_flag_data, multicast_casted_data, delayFromOriginal)
+function CastMulticastedSpellInstantly(caster, ability, target, multicast_flag_data, multicast_casted_data)
 	local candidates = FindUnitsInRadius(multicast_flag_data.team, caster:GetOrigin(), nil, multicast_flag_data.cast_range, multicast_flag_data.abilityTarget, multicast_flag_data.abilityTargetType, multicast_flag_data.targetFlags, FIND_ANY_ORDER, false)
 	local Tier1 = {} --heroes
 	local Tier2 = {} --creeps and self
 	local Tier3 = {} --already casted
 	local Tier4 = {} --dead stuff
 	for k, v in pairs(candidates) do
-		if caster:CanEntityBeSeenByMyTeam(v) and v:GetUnitName() ~= "npc_dummy_unit" then
+		if caster:CanEntityBeSeenByMyTeam(v)then
 			if multicast_casted_data[v] then
 				Tier3[#Tier3 + 1] = v
 			elseif not v:IsAlive() then
@@ -206,7 +206,7 @@ function CastMulticastedSpellInstantly(caster, ability, target, multicast_flag_d
 	end
 	local castTarget = Tier1[math.random(#Tier1)] or Tier2[math.random(#Tier2)] or Tier3[math.random(#Tier3)] or Tier4[math.random(#Tier4)] or target
 	multicast_casted_data[castTarget] = true
-	CastAdditionalAbility(caster, ability, castTarget, delayFromOriginal)
+	CastAdditionalAbility(caster, ability, castTarget)
 	return multicast_casted_data
 end
 
@@ -233,7 +233,7 @@ function CastMulticastedSpell(caster, ability, target, multicasts, multicast_typ
 	end
 end
 
-function CastAdditionalAbility(caster, ability, target, delay)
+function CastAdditionalAbility(caster, ability, target)
 	local skill = ability
 	local unit = caster
 	local channelled = false
