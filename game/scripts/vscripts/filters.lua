@@ -3,7 +3,6 @@ Events:Register("activate", function ()
 	GameRules:GetGameModeEntity():SetDamageFilter(Dynamic_Wrap(GameMode, 'DamageFilter'), GameRules)
 	GameRules:GetGameModeEntity():SetModifyGoldFilter(Dynamic_Wrap(GameMode, 'ModifyGoldFilter'), GameRules)
 	GameRules:GetGameModeEntity():SetModifyExperienceFilter(Dynamic_Wrap(GameMode, 'ModifyExperienceFilter'), GameRules)
-	GameRules:GetGameModeEntity():SetItemAddedToInventoryFilter(Dynamic_Wrap(GameMode, 'ItemAddedToInventoryFilter'), GameRules)
 end)
 
 function GameMode:ExecuteOrderFilter(filterTable)
@@ -269,13 +268,4 @@ function GameMode:ModifyExperienceFilter(filterTable)
 		filterTable.experience = filterTable.experience * 0.1
 	end
 	return true
-end
-
-function GameMode:ItemAddedToInventoryFilter(filterTable)
-	local item = EntIndexToHScript(filterTable.item_entindex_const)
-	if item.RuneType then 
-		local unit = EntIndexToHScript(filterTable.inventory_parent_entindex_const)
-		CustomRunes:PickUpRune(unit, item)
-		return false
-	end
 end
