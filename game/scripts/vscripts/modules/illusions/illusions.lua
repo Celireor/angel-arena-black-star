@@ -37,12 +37,10 @@ function Illusions:_copyItems(unit, illusion)
 	for slot = 0, 5 do
 		local item = unit:GetItemInSlot(slot)
 		if item then
-			local illusionItem = CreateItem(item:GetName(), illusion, illusion)
-			illusionItem:SetCurrentCharges(item:GetCurrentCharges())
-			illusionItem.suggestedSlot = slot
-			illusion:AddItem(illusionItem)
+			illusion:CopyItemToSlot(item, slot, unit, illusion)
 		end
 	end
+	illusion:RestoreOwners(0, 5)
 end
 
 function Illusions:_copyShards(unit, illusion)
