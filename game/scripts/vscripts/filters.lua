@@ -277,6 +277,13 @@ end
 
 function GameMode:ItemAddedToInventoryFilter(filterTable)
 	local item = EntIndexToHScript(filterTable.item_entindex_const)
+  
+	if item.RuneType then 
+		local unit = EntIndexToHScript(filterTable.inventory_parent_entindex_const)
+		CustomRunes:PickUpRune(unit, item)
+		return false
+	end
+  
 	--Send info to panorama shops
 	if not item.isNotNew then
 		item.isNotNew = true
@@ -289,7 +296,7 @@ function GameMode:ItemAddedToInventoryFilter(filterTable)
 			Timers:CreateTimer(0, GameMode.SendArenaNewItem, args)
 		end
 	end
-
+  
 	if item.suggestedSlot then
 		filterTable.suggested_slot = item.suggestedSlot
 		item.suggestedSlot = nil
