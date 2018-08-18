@@ -30,6 +30,9 @@ NOT_MULTICASTABLE_ABILITIES = {
 	"elder_titan_ancestral_spirit",
 	"elder_titan_return_spirit",
 	"ember_spirit_sleight_of_fist",
+	"monkey_king_tree_dance",
+	"monkey_king_primal_spring",
+	"monkey_king_primal_spring_early",
 }
 
 REFRESH_LIST_IGNORE_REFRESHER = {
@@ -73,6 +76,17 @@ REFRESH_LIST_IGNORE_REARM = {
 
 	destroyer_body_reconstruction = true,
 	stargazer_cosmic_countdown = true,
+	faceless_void_chronosphere = true,
+	zuus_thundergods_wrath = true,
+	enigma_black_hole = true,
+	freya_pain_reflection = true,
+	skeleton_king_reincarnation_arena = true,
+	dazzle_shallow_grave = true,
+	zuus_cloud = true,
+	ancient_apparition_ice_blast = true,
+	silencer_global_silence = true,
+	naga_siren_song_of_the_siren = true,
+	slark_shadow_dance = true,
 }
 
 COFFEE_BEAN_NOT_REFRESHABLE = {

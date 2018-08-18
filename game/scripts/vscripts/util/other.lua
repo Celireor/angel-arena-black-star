@@ -1,89 +1,14 @@
-function GetAllPlayers(bOnlyWithHeroes)
-	local Players = {}
-	for playerId = 0, DOTA_MAX_TEAM_PLAYERS-1  do
-		if PlayerResource:IsValidPlayerID(playerId) then
-			local player = PlayerResource:GetPlayer(playerId)
-			if player and ((bOnlyWithHeroes and player:GetAssignedHero()) or not bOnlyWithHeroes) then
-				table.insert(Players, player)
-			end
-		end
-	end
-	return Players
-end
-
 function CreateTeamNotificationSettings(team, bSecond)
 	local textColor = ColorTableToCss(Teams:GetColor(team))
 	return {text = Teams:GetName(team, bSecond), continue = true, style = {color = textColor}}
 end
 
-function CreateItemNotificationSettings(sItemName)
-	return {text= "#DOTA_Tooltip_ability_" .. sItemName, duration=7.0, continue=true, style={color="orange"}}
-end
-
 function GetDOTATimeInMinutesFull()
-	return math.floor(GameRules:GetDOTATime(false, false)/60)
-end
-
-function CreatePortal(vLocation, vTarget, iRadius, sParticle, sDisabledParticle, bEnabled, fOptionalActOnTeleport, sOptionalName)
-	local unit = CreateUnitByName("npc_dummy_unit", vLocation, false, nil, nil, DOTA_TEAM_NEUTRALS)
-	unit.Teleport_Radius = iRadius
-	unit.Teleport_Target = vTarget
-	unit.Teleport_ParticleName = sParticle
-	unit.Teleport_DisabledParticleName = sDisabledParticle
-	unit.Teleport_ActionOnTeleport = fOptionalActOnTeleport
-	unit.Teleport_Name = sOptionalName
-	unit.Teleport_Enabled = not bEnabled
-	unit:AddAbility("teleport_passive")
-	if bEnabled then
-		unit:EnablePortal()
-	else
-		unit:DisablePortal()
-	end
-	return unit
-end
-
-function CreateLoopedPortal(point1, point2, iRadius, sParticle, sDisabledParticle, bEnabled, fOptionalActOnTeleport, sOptionalName)
-	for i = 1, 2 do
-		local point
-		local target
-		if i == 1 then
-			point = point1
-			target = point2
-		else
-			point = point2
-			target = point1
-		end
-		local unit = CreateUnitByName("npc_dummy_unit", point, false, nil, nil, DOTA_TEAM_NEUTRALS)
-		unit.Teleport_Radius = iRadius
-		unit.Teleport_Target = target
-		unit.Teleport_ParticleName = sParticle
-		unit.Teleport_DisabledParticleName = sDisabledParticle
-		unit.Teleport_ActionOnTeleport = fOptionalActOnTeleport
-		unit.Teleport_Name = sOptionalName
-		unit.Teleport_Enabled = not bEnabled
-		unit.Teleport_Looped = true
-		unit:AddAbility("teleport_passive")
-		if bEnabled then
-			unit:EnablePortal()
-		else
-			unit:DisablePortal()
-		end
-	end
-	return unit
+	return math.floor(GameRules:GetDOTATime(false, false) / 60)
 end
 
 function CreateGoldNotificationSettings(amount)
 	return {text=amount, continue=true, style={color="gold"}}, {text="#notifications_gold", continue=true, style={color="gold"}}
-end
-
-function GetEnemiesIds(heroteam)
-	local enemies = {}
-	for _,playerId in ipairs(GetAllPlayers(false)) do
-		if PlayerResource:GetTeam(playerId:GetPlayerID()) ~= heroteam then
-			table.insert(enemies, playerId)
-		end
-	end
-	return enemies
 end
 
 function GenerateAttackProjectile(unit, optAbility)
@@ -109,26 +34,6 @@ function HasDamageFlag(damage_flags, flag)
 	return bit.band(damage_flags, flag) == flag
 end
 
-function GetLevelValue(value, level)
-	local split = {}
-	for i in string.gmatch(value, "%S+") do
-		table.insert(split, i)
-	end
-	if i[level+1] then
-		return split[level+1]
-	end
-end
-
-function PreformAbilityPrecastActions(unit, ability)
-	if ability:IsCooldownReady() and ability:IsOwnersManaEnough() then
-		ability:PayManaCost()
-		ability:AutoStartCooldown()
-		--ability:UseResources(true, true, true) -- not works with items?
-		return true
-	end
-	return false
-end
-
 function ReplaceAbilities(unit, oldAbility, newAbility, keepLevel, keepCooldown)
 	local ability = unit:FindAbilityByName(oldAbility)
 	local level = ability:GetLevel()
@@ -145,26 +50,91 @@ function ReplaceAbilities(unit, oldAbility, newAbility, keepLevel, keepCooldown)
 end
 
 function PreformMulticast(caster, ability_cast, multicast, multicast_delay, target)
-	if ability_cast:IsMulticastable() then
+	local multicast_type = ability_cast:GetMulticastType()
+	if multicast_type then
 		local prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
-		ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
-		prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
-		prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
-		prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_c.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
-		ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
-		CastMulticastedSpell(caster, ability_cast, target, multicast-1, multicast_delay)
+		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
+		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
+		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_c.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
+		--ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
+		local multicast_flag_data = GetMulticastFlags(caster, ability_cast, multicast_type)
+		if multicast_type ~= 3 then
+			CastMulticastedSpell(caster, ability_cast, target, multicast-1, multicast_type, multicast_flag_data, {}, multicast_delay, prt, 2)
+		else
+			Timers:CreateTimer(0, function()
+				ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
+				ParticleManager:ReleaseParticleIndex(prt)
+				local multicast_casted_data = {}
+				for i=2,multicast do
+					CastMulticastedSpellInstantly(caster, ability_cast, target, multicast_flag_data, multicast_casted_data)
+				end
+			end)
+		end
 	end
 end
 
-function CastMulticastedSpell(caster, ability, target, multicasts, delay)
+function GetMulticastFlags(caster, ability, multicast_type)
+	local rv = {}
+	if multicast_type ~= 1 then
+		rv.cast_range = ability:GetCastRange(caster:GetOrigin(), caster)
+		local abilityTarget = ability:GetAbilityTargetTeam()
+		if abilityTarget == 0 then abilityTarget = DOTA_UNIT_TARGET_TEAM_ENEMY end
+		rv.abilityTarget = abilityTarget
+		local abilityTargetType = ability:GetAbilityTargetTeam()
+		if abilityTargetType == 0 then abilityTargetType = DOTA_UNIT_TARGET_ALL
+		elseif abilityTargetType == 2 and ability:HasBehavior(DOTA_ABILITY_BEHAVIOR_POINT) then abilityTargetType = 3 end
+		rv.abilityTargetType = abilityTargetType
+		rv.team = caster:GetTeam()
+		rv.targetFlags = ability:GetAbilityTargetFlags()
+	end
+	return rv
+end
+
+function CastMulticastedSpellInstantly(caster, ability, target, multicast_flag_data, multicast_casted_data)
+	local candidates = FindUnitsInRadius(multicast_flag_data.team, caster:GetOrigin(), nil, multicast_flag_data.cast_range, multicast_flag_data.abilityTarget, multicast_flag_data.abilityTargetType, multicast_flag_data.targetFlags, FIND_ANY_ORDER, false)
+	local Tier1 = {} --heroes
+	local Tier2 = {} --creeps and self
+	local Tier3 = {} --already casted
+	local Tier4 = {} --dead stuff
+	for k, v in pairs(candidates) do
+		if caster:CanEntityBeSeenByMyTeam(v)then
+			if multicast_casted_data[v] then
+				Tier3[#Tier3 + 1] = v
+			elseif not v:IsAlive() then
+				Tier4[#Tier4 + 1] = v
+			elseif v:IsHero() and v ~= caster then
+				Tier1[#Tier1 + 1] = v
+			else 
+				Tier2[#Tier2 + 1] = v
+			end
+		end
+	end
+	local castTarget = Tier1[math.random(#Tier1)] or Tier2[math.random(#Tier2)] or Tier3[math.random(#Tier3)] or Tier4[math.random(#Tier4)] or target
+	multicast_casted_data[castTarget] = true
+	CastAdditionalAbility(caster, ability, castTarget)
+	return multicast_casted_data
+end
+
+function CastMulticastedSpell(caster, ability, target, multicasts, multicast_type, multicast_flag_data, multicast_casted_data, delay, prt, prtNumber)
 	if multicasts >= 1 then
 		Timers:CreateTimer(delay, function()
-			CastAdditionalAbility(caster, ability, target)
+			ParticleManager:DestroyParticle(prt, true)
+			ParticleManager:ReleaseParticleIndex(prt)
+			prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
+			ParticleManager:SetParticleControl(prt, 1, Vector(prtNumber, 0, 0))
+			if multicast_type == 1 then
+				CastAdditionalAbility(caster, ability, target)
+			else
+				multicast_casted_data = CastMulticastedSpellInstantly(caster, ability, target, multicast_flag_data, multicast_casted_data)
+			end
 			caster:EmitSound('Hero_OgreMagi.Fireblast.x'.. multicasts)
 			if multicasts >= 2 then
-				CastMulticastedSpell(caster, ability, target, multicasts - 1, delay)
+				CastMulticastedSpell(caster, ability, target, multicasts - 1, multicast_type, multicast_flag_data, multicast_casted_data, delay, prt, prtNumber + 1)
 			end
 		end)
+	else
+		ParticleManager:DestroyParticle(prt, false)
+		ParticleManager:ReleaseParticleIndex(prt)
 	end
 end
 
@@ -243,30 +213,6 @@ function CastAdditionalAbility(caster, ability, target, delay)
 	end
 end
 
-function EndAdditionalAbilityChannel(caster, unit, skill, bInterrupted, delay)
-	Timers:CreateTimer(delay or 0, function()
-		FindClearSpaceForUnit(unit, caster:GetOrigin() - caster:GetForwardVector(), false)
-		skill:EndChannel(bInterrupted)
-		skill:OnChannelFinish(bInterrupted)
-	end)
-end
-
-function IsHeroInAbilityPhase(unit)
-	for i = 0, unit:GetAbilityCount()-1 do
-		local ability = unit:GetAbilityByIndex(i)
-		if ability and ability.IsInAbilityPhase and ability:IsInAbilityPhase() then
-			return true
-		end
-	end
-	for i = 0, 5 do
-		local item = unit:GetItemInSlot(i)
-		if item and item.IsInAbilityPhase and item:IsInAbilityPhase() then
-			return true
-		end
-	end
-	return false
-end
-
 function GetAllAbilitiesCooldowns(unit)
 	local cooldowns = {}
 	for i = 0, unit:GetAbilityCount()-1 do
@@ -313,23 +259,8 @@ function SafePerformAttack(unit, hTarget, bUseCastAttackOrb, bProcessProcs, bSki
 	unit.AttackFuncs = nil
 end
 
-function UniqueRandomInts(min, max, count)
-	local output = {}
-	while #output < count do
-		local r = RandomInt(min, max)
-		if not table.contains(output, r) then
-			table.insert(output, r)
-		end
-	end
-	return output
-end
-
 function ColorTableToCss(color)
 	return "rgb(" .. color[1] .. ',' .. color[2] .. ',' .. color[3] .. ')'
-end
-
-function IsPlayerAbandoned(playerId)
-	return PLAYER_DATA[playerId].IsAbandoned == true
 end
 
 function FindAllOwnedUnits(player)
@@ -370,17 +301,7 @@ end
 function GetTeamPlayerCount(iTeam)
 	local counter = 0
 	for i = 0, 23 do
-		if PlayerResource:IsValidPlayerID(i) and not IsPlayerAbandoned(i) and PlayerResource:GetTeam(i) == iTeam then
-			counter = counter + 1
-		end
-	end
-	return counter
-end
-
-function GetTeamAbandonedPlayerCount(iTeam)
-	local counter = 0
-	for i = 0, 23 do
-		if PlayerResource:IsValidPlayerID(i) and IsPlayerAbandoned(i) and PlayerResource:GetTeam(i) == iTeam then
+		if PlayerResource:IsValidPlayerID(i) and not PlayerResource:IsPlayerAbandoned(i) and PlayerResource:GetTeam(i) == iTeam then
 			counter = counter + 1
 		end
 	end
@@ -403,7 +324,7 @@ function GetOneRemainingTeam()
 end
 
 function CopyItem(item)
-	local newItem = CreateItem(item:GetAbilityName(), caster, caster)
+	local newItem = CreateItem(item:GetAbilityName(), nil, nil)
 	newItem:SetPurchaseTime(item:GetPurchaseTime())
 	newItem:SetPurchaser(item:GetPurchaser())
 	newItem:SetOwner(item:GetOwner())
@@ -427,11 +348,6 @@ function SafeHeal(unit, flAmount, hInflictor, overhead)
 	end
 end
 
-function InvokeCheatCommand(s)
-	Convars:SetInt("sv_cheats", 1)
-	SendToServerConsole(s)
-end
-
 function UnitVarToPlayerID(unitvar)
 	if unitvar then
 		if type(unitvar) == "number" then
@@ -447,16 +363,6 @@ function UnitVarToPlayerID(unitvar)
 	return -1
 end
 
-function FindUnitsInBox(teamNumber, vStartPos, vEndPos, cacheUnit, teamFilter, typeFilter, flagFilter)
-	local hlen = (vEndPos.y-vStartPos.y) / 2
-	local cen = vStartPos.y+hlen
-	vStartPos.y = cen
-	vEndPos.y = cen
-	vStartPos.z = 0
-	vEndPos.z = 0
-	return FindUnitsInLine(teamNumber, vStartPos, vEndPos, cacheUnit, hlen, teamFilter, typeFilter, flagFilter)
-end
-
 function GetTrueItemCost(name)
 	local cost = GetItemCost(name)
 	if cost <= 0 then
@@ -469,18 +375,6 @@ function GetTrueItemCost(name)
 		end
 	end
 	return cost
-end
-
-function FindNearestEntity(vec3, units)
-	local unit
-	local range
-	for _,v in ipairs(units) do
-		if not range or (v:GetAbsOrigin()-vec3):Length2D() < range then
-			unit = v
-			range = (v:GetAbsOrigin()-vec3):Length2D()
-		end
-	end
-	return unit
 end
 
 function FindCourier(team)
@@ -627,12 +521,6 @@ function GetTeamAllPlayerCount(iTeam)
 	return counter
 end
 
-function Lifesteal(ability, unit, target, damage)
-	local target = keys.target
-	local lifesteal = keys.damage * keys.percent * 0.01
-	SafeHeal(caster, lifesteal, keys.ability, true)
-end
-
 function RecreateAbility(unit, ability)
 	local name = ability:GetAbilityName()
 	local level = ability:GetLevel()
@@ -683,11 +571,6 @@ function SimpleDamageReflect(victim, attacker, damage, flags, ability, damage_ty
 	return false
 end
 
-function GetLinkedHeroNames(hero)
-	local linked = GetKeyValue(hero, "LinkedHero")
-	return linked and string.split(linked, " | ") or {}
-end
-
 function IsModifierStrongest(unit, modifier, modifierList)
 	local ind = modifierList[modifier]
 	if not ind then return false end
@@ -713,10 +596,6 @@ end
 
 function pluralize(n, one, many)
 	return n == 1 and one or (many or one .. "s")
-end
-
-function iif(cond, yes, no)
-	if cond then return yes else return no end
 end
 
 function RemoveAllUnitsByName(name)
@@ -746,4 +625,17 @@ function ExpandVector(vec, by)
 		(math.abs(vec.y) + by) * math.sign(vec.y),
 		(math.abs(vec.z) + by) * math.sign(vec.z)
 	)
+end
+
+function VectorOnBoxPerimeter(vec, min, max)
+	local l, r, b, t = min.x, max.x, min.y, max.y
+	local x, y = math.clamp(vec.x, l, r), math.clamp(vec.y, b, t)
+
+	local dl, dr, db, dt = math.abs(x-l), math.abs(x-r), math.abs(y-b), math.abs(y-t)
+	local m = math.min(dl, dr, db, dt)
+
+	if m == dl then return Vector(l, y) end
+	if m == dr then return Vector(r, y) end
+	if m == db then return Vector(x, b) end
+	if m == dt then return Vector(x, t) end
 end
