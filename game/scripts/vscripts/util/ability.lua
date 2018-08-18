@@ -18,11 +18,11 @@ end
 
 --not set in stone, are just examples
 local MULTICAST_TYPE = {
-	terrorblade_conjure_image = 3
-	terrorblade_reflection = 3
-	magnataur_empower = 3
-	oracle_purifying_flames = 1
-	vengefulspirit_magic_missile = 1
+	terrorblade_conjure_image = 3,
+	terrorblade_reflection = 3,
+	magnataur_empower = 3,
+	oracle_purifying_flames = 1,
+	vengefulspirit_magic_missile = 1,
 }
 
 function CDOTABaseAbility:GetMulticastType()
