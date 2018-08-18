@@ -85,6 +85,15 @@ function GameMode:ExecuteOrderFilter(filterTable)
 			Containers:DisplayError(playerId, "#dota_hud_error_ability_cant_target_boss")
 			return false
 		end
+	elseif order_type == DOTA_UNIT_ORDER_SET_ITEM_COMBINE_LOCK then
+		local lockType = filterTable.entindex_target
+		if ability.auto_lock_order then
+			ability.auto_lock_order = false
+		elseif lockType == 0 then
+			ability.player_locked = false
+		else
+			ability.player_locked = true
+		end
 	end
 
 	return true
@@ -275,9 +284,39 @@ function GameMode:ItemAddedToInventoryFilter(filterTable)
 		return false
 	end
   
+	--Send info to panorama shops
+	if not item.isNotNew then
+		item.isNotNew = true
+		local abilityName = item:GetAbilityName()
+		local owner = item:GetPurchaser()
+		local isStackable = item:IsStackable()
+		if owner then
+			local ownerIndex = owner:GetEntityIndex()
+			local args = {frameDelay = 2, args = {item = filterTable.item_entindex_const, itemName = abilityName, owner = ownerIndex, stackable = isStackable}}
+			Timers:CreateTimer(0, GameMode.SendArenaNewItem, args)
+		end
+	end
+  
 	if item.suggestedSlot then
 		filterTable.suggested_slot = item.suggestedSlot
 		item.suggestedSlot = nil
 	end
 	return true
+  
+end
+
+function GameMode.SendArenaNewItem(args)
+	if (args.frameDelay > 0) then
+		args.frameDelay = args.frameDelay - 1
+		return 0
+	else
+		local passedArgs = args.args
+		local item = EntIndexToHScript(passedArgs.item)
+		if (item) then
+			passedArgs.isDropped = item:GetContainer() ~= nil
+		else
+			passedArgs.isDropped = false;
+		end
+		CustomGameEventManager:Send_ServerToAllClients("arena_new_item", passedArgs)
+	end
 end

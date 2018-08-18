@@ -50,35 +50,116 @@ function ReplaceAbilities(unit, oldAbility, newAbility, keepLevel, keepCooldown)
 end
 
 function PreformMulticast(caster, ability_cast, multicast, multicast_delay, target)
-	if ability_cast:IsMulticastable() then
+	local multicast_type = ability_cast:GetMulticastType()
+	if multicast_type then
 		local prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
-		ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
-		prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
-		prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
-		prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_c.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
-		ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
-		CastMulticastedSpell(caster, ability_cast, target, multicast-1, multicast_delay)
+		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
+		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_b.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
+		--prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast_c.vpcf', PATTACH_OVERHEAD_FOLLOW, caster:GetCursorCastTarget() or caster)
+		--ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
+		local multicast_flag_data = GetMulticastFlags(caster, ability_cast, multicast_type)
+		if multicast_type ~= 3 then
+			CastMulticastedSpell(caster, ability_cast, target, multicast-1, multicast_type, multicast_flag_data, {}, multicast_delay, prt, 2)
+		else
+			Timers:CreateTimer(0, function()
+				ParticleManager:SetParticleControl(prt, 1, Vector(multicast, 0, 0))
+				ParticleManager:ReleaseParticleIndex(prt)
+				local multicast_casted_data = {}
+				for i=2,multicast do
+					CastMulticastedSpellInstantly(caster, ability_cast, target, multicast_flag_data, multicast_casted_data)
+				end
+			end)
+		end
 	end
 end
 
-function CastMulticastedSpell(caster, ability, target, multicasts, delay)
+function GetMulticastFlags(caster, ability, multicast_type)
+	local rv = {}
+	if multicast_type ~= 1 then
+		rv.cast_range = ability:GetCastRange(caster:GetOrigin(), caster)
+		local abilityTarget = ability:GetAbilityTargetTeam()
+		if abilityTarget == 0 then abilityTarget = DOTA_UNIT_TARGET_TEAM_ENEMY end
+		rv.abilityTarget = abilityTarget
+		local abilityTargetType = ability:GetAbilityTargetTeam()
+		if abilityTargetType == 0 then abilityTargetType = DOTA_UNIT_TARGET_ALL
+		elseif abilityTargetType == 2 and ability:HasBehavior(DOTA_ABILITY_BEHAVIOR_POINT) then abilityTargetType = 3 end
+		rv.abilityTargetType = abilityTargetType
+		rv.team = caster:GetTeam()
+		rv.targetFlags = ability:GetAbilityTargetFlags()
+	end
+	return rv
+end
+
+function CastMulticastedSpellInstantly(caster, ability, target, multicast_flag_data, multicast_casted_data)
+	local candidates = FindUnitsInRadius(multicast_flag_data.team, caster:GetOrigin(), nil, multicast_flag_data.cast_range, multicast_flag_data.abilityTarget, multicast_flag_data.abilityTargetType, multicast_flag_data.targetFlags, FIND_ANY_ORDER, false)
+	local Tier1 = {} --heroes
+	local Tier2 = {} --creeps and self
+	local Tier3 = {} --already casted
+	local Tier4 = {} --dead stuff
+	for k, v in pairs(candidates) do
+		if caster:CanEntityBeSeenByMyTeam(v)then
+			if multicast_casted_data[v] then
+				Tier3[#Tier3 + 1] = v
+			elseif not v:IsAlive() then
+				Tier4[#Tier4 + 1] = v
+			elseif v:IsHero() and v ~= caster then
+				Tier1[#Tier1 + 1] = v
+			else 
+				Tier2[#Tier2 + 1] = v
+			end
+		end
+	end
+	local castTarget = Tier1[math.random(#Tier1)] or Tier2[math.random(#Tier2)] or Tier3[math.random(#Tier3)] or Tier4[math.random(#Tier4)] or target
+	multicast_casted_data[castTarget] = true
+	CastAdditionalAbility(caster, ability, castTarget)
+	return multicast_casted_data
+end
+
+function CastMulticastedSpell(caster, ability, target, multicasts, multicast_type, multicast_flag_data, multicast_casted_data, delay, prt, prtNumber)
 	if multicasts >= 1 then
 		Timers:CreateTimer(delay, function()
-			CastAdditionalAbility(caster, ability, target)
+			ParticleManager:DestroyParticle(prt, true)
+			ParticleManager:ReleaseParticleIndex(prt)
+			prt = ParticleManager:CreateParticle('particles/units/heroes/hero_ogre_magi/ogre_magi_multicast.vpcf', PATTACH_OVERHEAD_FOLLOW, caster)
+			ParticleManager:SetParticleControl(prt, 1, Vector(prtNumber, 0, 0))
+			if multicast_type == 1 then
+				CastAdditionalAbility(caster, ability, target)
+			else
+				multicast_casted_data = CastMulticastedSpellInstantly(caster, ability, target, multicast_flag_data, multicast_casted_data)
+			end
 			caster:EmitSound('Hero_OgreMagi.Fireblast.x'.. multicasts)
 			if multicasts >= 2 then
-				CastMulticastedSpell(caster, ability, target, multicasts - 1, delay)
+				CastMulticastedSpell(caster, ability, target, multicasts - 1, multicast_type, multicast_flag_data, multicast_casted_data, delay, prt, prtNumber + 1)
 			end
 		end)
+	else
+		ParticleManager:DestroyParticle(prt, false)
+		ParticleManager:ReleaseParticleIndex(prt)
 	end
 end
 
-function CastAdditionalAbility(caster, ability, target)
+function PrecacheDummyCasters(caster)
+	local dummyCasters = caster.dummyCasters
+	local dummy = CreateUnitByName("npc_dummy_caster", caster:GetAbsOrigin(), true, caster, caster, caster:GetTeamNumber())
+	dummyCasters[#dummyCasters + 1] = dummy
+	dummy:SetControllableByPlayer(caster:GetPlayerID(), true)
+	dummy:AddNoDraw()
+	dummy:MakeIllusion()
+end
+
+function CastAdditionalAbility(caster, ability, target, delay)
 	local skill = ability
 	local unit = caster
-	local channelled = false
-	if ability:HasBehavior(DOTA_ABILITY_BEHAVIOR_CHANNELLED) then
-		local dummy = CreateUnitByName("npc_dummy_unit", caster:GetAbsOrigin(), true, caster, caster, caster:GetTeamNumber())
+	local channelTime = ability:GetKeyValue("AbilityChannelTime")
+	if channelTime > 0 then
+		if not caster.dummyCasters then
+			caster.dummyCasters = caster.dummyCasters or {}
+			caster.nextFreeDummyCaster = caster.nextFreeDummyCaster or 1
+			for i=0,8 do PrecacheDummyCasters(caster) end
+		end
+		local dummy = caster.dummyCasters[caster.nextFreeDummyCaster]--CreateUnitByName("npc_dummy_unit", caster:GetAbsOrigin(), true, caster, caster, caster:GetTeamNumber())
+		caster.nextFreeDummyCaster = caster.nextFreeDummyCaster + 1
+		if caster.nextFreeDummyCaster > #caster.dummyCasters then caster.nextFreeDummyCaster = 1 end
 		--TODO сделать чтобы дамаг от скилла умножался от инты.
 		for i = 0, DOTA_ITEM_SLOT_9 do
 			local citem = caster:GetItemInSlot(i)
@@ -86,47 +167,49 @@ function CastAdditionalAbility(caster, ability, target)
 				dummy:AddItem(CopyItem(citem))
 			end
 		end
-		if caster:HasScepter() then dummy:AddNewModifier(caster, nil, "modifier_item_ultimate_scepter", {}) end
-		dummy:SetControllableByPlayer(caster:GetPlayerID(), true)
 		dummy:SetOwner(caster)
 		dummy:SetAbsOrigin(caster:GetAbsOrigin())
-		dummy.GetStrength = function()
-			return caster:GetStrength()
+		dummy:SetBaseStrength (caster:GetStrength())
+		dummy:SetBaseAgility(caster:GetAgility())
+		dummy:SetBaseIntellect(caster:GetIntellect())
+		for _, v in pairs(caster:FindAllModifiers()) do
+			local buffName = v:GetName()
+			local buffAbility = v:GetAbility()
+			local dummyModifier = dummy:FindModifierByName(buffName) or dummy:AddNewModifier(dummy, buffAbility, buffName, nil)
+			dummyModifier:SetStackCount(v:GetStackCount())
 		end
-		dummy.GetAgility = function()
-			return caster:GetAgility()
-		end
-		dummy.GetIntellect = function()
-			return caster:GetIntellect()
-		end
+		Illusions:_copyAbilities(caster, dummy)
 		skill = dummy:AddAbility(ability:GetName())
 		unit = dummy
 		skill:SetLevel(ability:GetLevel())
-		channelled = true
+		skill.GetCaster = function() return ability:GetCaster() end
 	end
 	if skill:HasBehavior(DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) then
 		if target and type(target) == "table" then
 			unit:SetCursorCastTarget(target)
 		end
-	elseif skill:HasBehavior(DOTA_ABILITY_BEHAVIOR_POINT) then
-		if target and target.x and target.y and target.z then
-			unit:SetCursorPosition(target)
+	end
+	if skill:HasBehavior(DOTA_ABILITY_BEHAVIOR_POINT) then
+		if target then
+			if target.x and target.y and target.z then
+				unit:SetCursorPosition(target)
+			elseif target.GetOrigin then
+				unit:SetCursorPosition(target:GetOrigin())
+			end
 		end
 	end
 	skill:OnSpellStart()
-	if channelled then
-		Timers:CreateTimer(0.03, function()
-			if not caster:IsChanneling() then
-				skill:EndChannel(true)
-				skill:OnChannelFinish(true)
-				Timers:CreateTimer(0.03, function()
-					if skill then UTIL_Remove(skill) end
-					if unit then UTIL_Remove(unit) end
-				end)
-			else
-				return 0.03
+	if channelTime > 0 then
+		local AbilityLastEndTime = ability.lastEndTime
+		if ability:IsChanneling() and (not AbilityLastEndTime or AbilityLastEndTime < GameRules:GetGameTime() - delay) then
+			local index = #ability.EndChannelListeners + 1
+			ability.EndChannelListeners[index] = function(bInterrupted)
+				ability.EndChannelListeners[index] = nil
+				EndAdditionalAbilityChannel(caster, unit, skill, bInterrupted, delay)
 			end
-		end)
+		else
+			EndAdditionalAbilityChannel(caster, unit, skill, ability.channelFailed, delay - GameRules:GetGameTime() + AbilityLastEndTime)
+		end
 	end
 end
 
@@ -202,8 +285,16 @@ function RemoveAllOwnedUnits(playerId)
 		if v ~= hero and v ~= courier then
 			v:ClearNetworkableEntityInfo()
 			v:ForceKill(false)
+			RemoveDummyCasters(v)
 			UTIL_Remove(v)
 		end
+		RemoveDummyCasters(hero)
+	end
+end
+
+function RemoveDummyCasters(unit)
+	if unit.dummyCasters then
+		for _, dummyCaster in pairs(unit.dummyCasters) do UTIL_Remove(dummyCaster) end
 	end
 end
 
