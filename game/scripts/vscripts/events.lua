@@ -171,7 +171,7 @@ function GameMode:OnEntityKilled(keys)
 			end
 		end
 
-		if killedUnit:IsBoss() and not killedUnit.IsDominatedBoss then
+		if killedUnit:IsBoss() and Bosses:IsLastBossEntity(killedUnit) then
 			local team = DOTA_TEAM_NEUTRALS
 			if killerEntity then
 				team = killerEntity:GetTeam()
@@ -181,6 +181,10 @@ function GameMode:OnEntityKilled(keys)
 
 		if killedUnit:IsRealCreep() then
 			Spawner:OnCreepDeath(killedUnit)
+		end
+
+		if not killedUnit:UnitCanRespawn() then
+			killedUnit:ClearNetworkableEntityInfo()
 		end
 
 		if killerEntity then

@@ -28,17 +28,19 @@ end
 
 function Illusions:_copyItems(unit, illusion)
 	for slot = 0, 5 do
-		local illusion_item = illusion:GetItemInSlot(slot)
-		if illusion_item then
-			illusion:RemoveItem(illusion_item)
+		local illusionItem = illusion:GetItemInSlot(slot)
+		if illusionItem then
+			illusion:RemoveItem(illusionItem)
 		end
 	end
-	
-	for slot = 0, 5 do		
+
+	for slot = 0, 5 do
 		local item = unit:GetItemInSlot(slot)
 		if item then
-			local illusion_item = illusion:AddItem(CreateItem(item:GetName(), illusion, illusion))
-			illusion_item:SetCurrentCharges(item:GetCurrentCharges())
+			local illusionItem = CreateItem(item:GetName(), illusion, illusion)
+			illusionItem:SetCurrentCharges(item:GetCurrentCharges())
+			illusionItem.suggestedSlot = slot
+			illusion:AddItem(illusionItem)
 		end
 	end
 end
@@ -86,14 +88,53 @@ end
 
 function Illusions:_copyAppearance(unit, illusion)
 	illusion:SetModelScale(unit:GetModelScale())
-	if unit:GetModelName() ~= illusion:GetModelName() then
-		illusion.ModelOverride = unit:GetModelName()
-		illusion:SetModel(illusion.ModelOverride)
-		illusion:SetOriginalModel(illusion.ModelOverride)
-	end
 	local rc = unit:GetRenderColor()
 	if rc ~= Vector(255, 255, 255) then
 		illusion:SetRenderColor(rc.x, rc.y, rc.z)
+	end
+end
+
+local COPYABLE_BUFFS = {
+	modifier_alchemist_chemical_rage = true,
+	modifier_arc_warden_tempest_double = true,
+	modifier_troll_warlord_berserkers_rage = true,
+	modifier_dragon_knight_dragon_form = true,
+	modifier_lone_druid_true_form = true,
+	modifier_morphling_morph = true,
+	modifier_terrorblade_metamorphosis_transform = true,
+	modifier_invoker_quas_instance = true,
+	modifier_invoker_wex_instance = true,
+	modifier_invoker_exort_instance = true,
+	modifier_undying_flesh_golem = true,
+	modifier_lycan_shapeshift = true,
+	modifier_apocalypse_apocalypse = true,
+	modifier_sai_release_of_forge = true,
+	modifier_item_armlet_unholy_strength = true,
+	modifier_item_moon_shard_consumed = true,
+}
+
+--Trick ElaspedTime dependent buffs such as Apocalypse
+CDOTA_Buff.SourceElaspedTime = 0
+CDOTA_Buff.OldGetElaspedTime = CDOTA_Buff.OldGetElaspedTime or CDOTA_Buff.GetElapsedTime
+CDOTA_Buff.GetElapsedTime = function(self)
+	return self:OldGetElaspedTime() + self.SourceElaspedTime
+end
+
+function Illusions:_copyBuffs(unit, illusion)
+	for _, v in pairs(unit:FindAllModifiers()) do
+		local buffName = v:GetName()
+		local buffAbility = v:GetAbility()
+		if COPYABLE_BUFFS[buffName] then
+			local illuModifier = illusion:AddNewModifier(illusion, buffAbility, buffName, nil)
+			illuModifier:SetStackCount(v:GetStackCount())
+			--Trick ElaspedTime dependent buffs such as Apocalypse
+			illuModifier.SourceElaspedTime = v:GetElapsedTime()
+			--Hack for Morphling
+			if buffName == "modifier_morphling_morph" then
+				illusion:SetBaseStrength(unit:GetBaseStrength() - (unit.Additional_str or 0))
+				illusion:SetBaseAgility(unit:GetBaseAgility() - (unit.Additional_agi or 0))
+			end
+		end
 	end
 end
 
@@ -122,12 +163,18 @@ function Illusions:create(info)
 	local isOwned = info.isOwned
 	if isOwned == nil then isOwned = true end
 
+	local source = unit
+	local replicateModifier = unit:FindModifierByName("modifier_morphling_replicate")
+	if replicateModifier then
+		source = replicateModifier:GetCaster()
+	end
+
 	local illusion = CreateUnitByName(
-		unit:GetUnitName(),
+		source:GetUnitName(),
 		origin,
 		true,
 		isOwned and unit or nil,
-		isOwned and unit:GetPlayerOwner() or nil,
+		isOwned and source:GetPlayerOwner() or nil,
 		team
 	)
 	if isOwned then illusion:SetControllableByPlayer(unit:GetPlayerID(), true) end
