@@ -7,13 +7,19 @@ function AbilityHasBehaviorByName(ability_name, behaviorString)
 	local AbilityBehavior = GetKeyValue(ability_name, "AbilityBehavior")
 	if AbilityBehavior then
 		local AbilityBehaviors = string.split(AbilityBehavior, " | ")
-		return table.contains(AbilityBehaviors, behaviorString)
+		return table.includes(AbilityBehaviors, behaviorString)
 	end
 	return false
 end
 
-function CDOTABaseAbility:PreformPrecastActions(unit)
-	return PreformAbilityPrecastActions(unit or self:GetCaster(), self)
+function CDOTABaseAbility:PerformPrecastActions()
+	if self:IsCooldownReady() and self:IsOwnersManaEnough() then
+		self:PayManaCost()
+		self:AutoStartCooldown()
+		--self:UseResources(true, true, true) -- not works with items?
+		return true
+	end
+	return false
 end
 
 --not set in stone, are just examples

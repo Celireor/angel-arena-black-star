@@ -16,6 +16,27 @@ function GameMode:OnNPCSpawned(keys)
 			--npc:AddNoDraw()
 			return
 		end
+		local tempest_modifier = npc:FindModifierByName("modifier_arc_warden_tempest_double")
+		if tempest_modifier then
+			local caster = tempest_modifier:GetCaster()
+			if npc:GetUnitName() == "npc_dota_hero" and not npc.isCustomTempest then
+				npc:SetUnitName("npc_dota_hero_arena_base")
+				npc.isCustomTempest = true
+				npc:AddNewModifier(unit, nil, "modifier_dragon_knight_dragon_form", {duration = 0})
+			end
+			if npc.stats_copied then
+				--Tempest Double resets stats and stuff, so everything needs to be put back where they belong
+				Illusions:_copyAbilities(caster, npc)
+				npc:ModifyStrength(caster:GetStrength() - npc:GetStrength())
+				npc:ModifyIntellect(caster:GetIntellect() - npc:GetIntellect())
+				npc:ModifyAgility(caster:GetAgility() - npc:GetAgility())
+				npc:SetHealth(caster:GetHealth())
+				npc:SetMana(caster:GetMana())
+			else
+				Illusions:_copyEverything(caster, npc)
+				npc.stats_copied = true
+			end
+		end
 		Timers:CreateTimer(function()
 			if IsValidEntity(npc) and npc:IsAlive() and npc:IsHero() and npc:GetPlayerOwner() then
 				Physics:Unit(npc)
@@ -25,6 +46,8 @@ function GameMode:OnNPCSpawned(keys)
 					npc:SetModel(npc.ModelOverride)
 					npc:SetOriginalModel(npc.ModelOverride)
 				end
+				local illu_modifier = npc:FindModifierByName("modifier_illusion")
+				if illu_modifier then Illusions:_copyEverything(illu_modifier:GetCaster(), npc) end
 				if not npc:IsWukongsSummon() then
 					npc:AddNewModifier(npc, nil, "modifier_arena_hero", nil)
 					if npc:IsTrueHero() then
@@ -148,7 +171,7 @@ function GameMode:OnEntityKilled(keys)
 			end
 		end
 
-		if killedUnit:IsBoss() and not killedUnit.IsDominatedBoss then
+		if killedUnit:IsBoss() and Bosses:IsLastBossEntity(killedUnit) then
 			local team = DOTA_TEAM_NEUTRALS
 			if killerEntity then
 				team = killerEntity:GetTeam()
@@ -158,6 +181,10 @@ function GameMode:OnEntityKilled(keys)
 
 		if killedUnit:IsRealCreep() then
 			Spawner:OnCreepDeath(killedUnit)
+		end
+
+		if not killedUnit:UnitCanRespawn() then
+			killedUnit:ClearNetworkableEntityInfo()
 		end
 
 		if killerEntity then
