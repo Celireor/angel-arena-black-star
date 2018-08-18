@@ -202,6 +202,7 @@ function CDOTA_BaseNPC:RestoreOwners(firstSlot, lastSlot)
 		end
 	end
 end
+
 			--Hero
 function CDOTA_BaseNPC_Hero:CalculateRespawnTime()
 	if self.OnDuel then return 1 end
