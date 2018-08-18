@@ -22,28 +22,6 @@ function Duel:CreateGlobalTimer()
 	Duel.DuelStatus = DOTA_DUEL_STATUS_WATING
 	Duel:SetDuelTimer(-GameRules:GetDOTATime(false, true))
 	Timers:CreateTimer(Dynamic_Wrap(Duel, 'GlobalThink'))
-
-	Duel:CreateBlocker()
-end
-
-function Duel:CreateBlocker()
-	local trigger = Entities:FindByName(nil, "trigger_arena_zone")
-	local origin = trigger:GetAbsOrigin()
-	local bounds = trigger:GetBounds()
-	local mins = origin + ExpandVector(bounds.Mins, 96)
-	local maxs = origin + ExpandVector(bounds.Maxs, 96)
-
-	Physics:RemoveCollider("collider_box_blocker_arena")
-	local collider = Physics:AddCollider("collider_box_blocker_arena", Physics:ColliderFromProfile("aaboxblocker"))
-	collider.box = {mins, maxs}
-	collider.findClearSpace = true
-	-- collider.draw = true
-	collider.test = function(self, unit)
-		if not IsPhysicsUnit(unit) and unit.IsConsideredHero and unit:IsConsideredHero() then
-			Physics:Unit(unit)
-		end
-		return IsPhysicsUnit(unit) and Duel.DuelStatus == DOTA_DUEL_STATUS_WATING and not unit.OnDuel
-	end
 end
 
 function Duel:GlobalThink()
@@ -68,10 +46,10 @@ end
 
 function Duel:StartDuel()
 	Duel.heroes_teams_for_duel = {}
-	for playerID = 0, DOTA_MAX_TEAM_PLAYERS - 1  do
-		if PlayerResource:IsValidPlayerID(playerID) and not IsPlayerAbandoned(playerID) then
-			local team = PlayerResource:GetTeam(playerID)
-			local hero = PlayerResource:GetSelectedHeroEntity(playerID)
+	for playerId = 0, DOTA_MAX_TEAM_PLAYERS - 1  do
+		if PlayerResource:IsValidPlayerID(playerId) and not PlayerResource:IsPlayerAbandoned(playerId) then
+			local team = PlayerResource:GetTeam(playerId)
+			local hero = PlayerResource:GetSelectedHeroEntity(playerId)
 			if IsValidEntity(hero) then
 				Duel.heroes_teams_for_duel[team] = Duel.heroes_teams_for_duel[team] or {}
 				table.insert(Duel.heroes_teams_for_duel[team], hero)
@@ -81,11 +59,11 @@ function Duel:StartDuel()
 	local heroes_in_teams = {}
 	for i,v in pairs(Duel.heroes_teams_for_duel) do
 		for _,unit in pairs(v) do
-			local pid = unit:GetPlayerOwnerID()
+			local playerId = unit:GetPlayerOwnerID()
 			if not unit:IsAlive() then
 				unit:RespawnHero(false, false)
 			end
-			if PlayerResource:IsValidPlayerID(pid) then
+			if PlayerResource:IsValidPlayerID(playerId) then
 				heroes_in_teams[i] = (heroes_in_teams[i] or 0) + 1
 			end
 		end
@@ -109,8 +87,8 @@ function Duel:StartDuel()
 				repeat
 					local unit = v[1]
 					if IsValidEntity(unit) then
-						local pid = unit:GetPlayerOwnerID()
-						if not unit.DuelChecked and unit:IsAlive() and PlayerResource:IsValidPlayerID(pid) then
+						local playerId = unit:GetPlayerOwnerID()
+						if not unit.DuelChecked and unit:IsAlive() and PlayerResource:IsValidPlayerID(playerId) then
 							unit.OnDuel = true
 							Duel:FillPreduelUnitData(unit)
 							unit:SetHealth(unit:GetMaxHealth())
@@ -133,11 +111,6 @@ function Duel:StartDuel()
 					end
 					if unit:HasModifier("modifier_item_tango_arena") then
 						unit:SetModifierStackCount("modifier_item_tango_arena", unit, math.round(unit:GetModifierStackCount("modifier_item_tango_arena", unit) * 0.5))
-					end
-					if unit.PocketItem then
-						unit.PocketHostEntity = nil
-						UTIL_Remove(unit.PocketItem)
-						unit.PocketItem = nil
 					end
 					if _unit.OnDuel then
 						unit.OnDuel = true
@@ -182,14 +155,14 @@ function Duel:EndDuel()
 		for _,t in pairs(Duel.heroes_teams_for_duel) do
 			for _,v in ipairs(t) do
 				if IsValidEntity(v) then
-					v:ModifyPlayerStat("Duels_Played", 1)
+					PlayerResource:ModifyPlayerStat(v:GetPlayerID(), "Duels_Played", 1)
 				end
 			end
 		end
 		for _,v in ipairs(Duel.heroes_teams_for_duel[winner]) do
 			if IsValidEntity(v) then
 				Gold:ModifyGold(v, goldAmount)
-				v:ModifyPlayerStat("Duels_Won", 1)
+				PlayerResource:ModifyPlayerStat(v:GetPlayerID(), "Duels_Won", 1)
 			end
 		end
 		Duel.TimesTeamWins[winner] = (Duel.TimesTeamWins[winner] or 0) + 1
@@ -209,7 +182,7 @@ function Duel:GetWinner()
 				unit:IsAlive() and
 				not PlayerResource:IsPlayerAbandoned(unit:GetPlayerID())
 		 	) then
-				if not table.contains(teams, team) and unit.OnDuel then
+				if not table.includes(teams, team) and unit.OnDuel then
 					table.insert(teams, team)
 				end
 			end
@@ -230,10 +203,10 @@ function Duel:EndDuelLogic(bEndForUnits, timeUpdate)
 	Duel.DuelStatus = DOTA_DUEL_STATUS_WATING
 	Duel.heroes_teams_for_duel = {}
 	if bEndForUnits then
-		for playerID = 0, DOTA_MAX_TEAM_PLAYERS-1  do
-			if PlayerResource:IsValidPlayerID(playerID) then
-				local _hero = PlayerResource:GetSelectedHeroEntity(playerID)
-				if not PlayerResource:IsPlayerAbandoned(playerID) and IsValidEntity(_hero) then
+		for playerId = 0, DOTA_MAX_TEAM_PLAYERS-1  do
+			if PlayerResource:IsValidPlayerID(playerId) then
+				local _hero = PlayerResource:GetSelectedHeroEntity(playerId)
+				if not PlayerResource:IsPlayerAbandoned(playerId) and IsValidEntity(_hero) then
 					for _,hero in ipairs(_hero:GetFullName() == "npc_dota_hero_meepo" and MeepoFixes:FindMeepos(_hero, true) or {_hero}) do
 						Duel:EndDuelForUnit(hero)
 					end
