@@ -66,3 +66,5 @@ end
 function CDOTABaseAbility:AutoStartCooldown()
 	self:StartCooldown(self:GetReducedCooldown())
 end
+
+CDOTABaseAbility.EndChannelListeners = {}

@@ -138,12 +138,28 @@ function CastMulticastedSpell(caster, ability, target, multicasts, multicast_typ
 	end
 end
 
-function CastAdditionalAbility(caster, ability, target)
+function PrecacheDummyCasters(caster)
+	local dummyCasters = caster.dummyCasters
+	local dummy = CreateUnitByName("npc_dummy_caster", caster:GetAbsOrigin(), true, caster, caster, caster:GetTeamNumber())
+	dummyCasters[#dummyCasters + 1] = dummy
+	dummy:SetControllableByPlayer(caster:GetPlayerID(), true)
+	dummy:AddNoDraw()
+	dummy:MakeIllusion()
+end
+
+function CastAdditionalAbility(caster, ability, target, delay)
 	local skill = ability
 	local unit = caster
-	local channelled = false
-	if ability:HasBehavior(DOTA_ABILITY_BEHAVIOR_CHANNELLED) then
-		local dummy = CreateUnitByName("npc_dummy_unit", caster:GetAbsOrigin(), true, caster, caster, caster:GetTeamNumber())
+	local channelTime = ability:GetKeyValue("AbilityChannelTime")
+	if channelTime > 0 then
+		if not caster.dummyCasters then
+			caster.dummyCasters = caster.dummyCasters or {}
+			caster.nextFreeDummyCaster = caster.nextFreeDummyCaster or 1
+			for i=0,8 do PrecacheDummyCasters(caster) end
+		end
+		local dummy = caster.dummyCasters[caster.nextFreeDummyCaster]--CreateUnitByName("npc_dummy_unit", caster:GetAbsOrigin(), true, caster, caster, caster:GetTeamNumber())
+		caster.nextFreeDummyCaster = caster.nextFreeDummyCaster + 1
+		if caster.nextFreeDummyCaster > #caster.dummyCasters then caster.nextFreeDummyCaster = 1 end
 		--TODO сделать чтобы дамаг от скилла умножался от инты.
 		for i = 0, DOTA_ITEM_SLOT_9 do
 			local citem = caster:GetItemInSlot(i)
@@ -151,23 +167,22 @@ function CastAdditionalAbility(caster, ability, target)
 				dummy:AddItem(CopyItem(citem))
 			end
 		end
-		if caster:HasScepter() then dummy:AddNewModifier(caster, nil, "modifier_item_ultimate_scepter", {}) end
-		dummy:SetControllableByPlayer(caster:GetPlayerID(), true)
 		dummy:SetOwner(caster)
 		dummy:SetAbsOrigin(caster:GetAbsOrigin())
-		dummy.GetStrength = function()
-			return caster:GetStrength()
+		dummy:SetBaseStrength (caster:GetStrength())
+		dummy:SetBaseAgility(caster:GetAgility())
+		dummy:SetBaseIntellect(caster:GetIntellect())
+		for _, v in pairs(caster:FindAllModifiers()) do
+			local buffName = v:GetName()
+			local buffAbility = v:GetAbility()
+			local dummyModifier = dummy:FindModifierByName(buffName) or dummy:AddNewModifier(dummy, buffAbility, buffName, nil)
+			dummyModifier:SetStackCount(v:GetStackCount())
 		end
-		dummy.GetAgility = function()
-			return caster:GetAgility()
-		end
-		dummy.GetIntellect = function()
-			return caster:GetIntellect()
-		end
+		Illusions:_copyAbilities(caster, dummy)
 		skill = dummy:AddAbility(ability:GetName())
 		unit = dummy
 		skill:SetLevel(ability:GetLevel())
-		channelled = true
+		skill.GetCaster = function() return ability:GetCaster() end
 	end
 	if skill:HasBehavior(DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) then
 		if target and type(target) == "table" then
@@ -184,19 +199,17 @@ function CastAdditionalAbility(caster, ability, target)
 		end
 	end
 	skill:OnSpellStart()
-	if channelled then
-		Timers:CreateTimer(0.03, function()
-			if not caster:IsChanneling() then
-				skill:EndChannel(true)
-				skill:OnChannelFinish(true)
-				Timers:CreateTimer(0.03, function()
-					if skill then UTIL_Remove(skill) end
-					if unit then UTIL_Remove(unit) end
-				end)
-			else
-				return 0.03
+	if channelTime > 0 then
+		local AbilityLastEndTime = ability.lastEndTime
+		if ability:IsChanneling() and (not AbilityLastEndTime or AbilityLastEndTime < GameRules:GetGameTime() - delay) then
+			local index = #ability.EndChannelListeners + 1
+			ability.EndChannelListeners[index] = function(bInterrupted)
+				ability.EndChannelListeners[index] = nil
+				EndAdditionalAbilityChannel(caster, unit, skill, bInterrupted, delay)
 			end
-		end)
+		else
+			EndAdditionalAbilityChannel(caster, unit, skill, ability.channelFailed, delay - GameRules:GetGameTime() + AbilityLastEndTime)
+		end
 	end
 end
 
@@ -272,8 +285,16 @@ function RemoveAllOwnedUnits(playerId)
 		if v ~= hero and v ~= courier then
 			v:ClearNetworkableEntityInfo()
 			v:ForceKill(false)
+			RemoveDummyCasters(v)
 			UTIL_Remove(v)
 		end
+		RemoveDummyCasters(hero)
+	end
+end
+
+function RemoveDummyCasters(unit)
+	if unit.dummyCasters then
+		for _, dummyCaster in pairs(unit.dummyCasters) do UTIL_Remove(dummyCaster) end
 	end
 end
 
