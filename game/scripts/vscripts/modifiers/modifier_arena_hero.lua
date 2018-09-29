@@ -7,13 +7,13 @@ modifier_arena_hero = class({
 
 function modifier_arena_hero:DeclareFunctions()
 	return {
-		MODIFIER_EVENT_ON_ATTACK_START,
 		MODIFIER_EVENT_ON_ABILITY_EXECUTED,
 		MODIFIER_PROPERTY_REFLECT_SPELL,
 		MODIFIER_PROPERTY_ABSORB_SPELL,
 		MODIFIER_EVENT_ON_DEATH,
 		MODIFIER_PROPERTY_ABILITY_LAYOUT,
-		MODIFIER_EVENT_ON_RESPAWN
+		MODIFIER_EVENT_ON_RESPAWN,
+		MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
 	}
 end
 
@@ -109,17 +109,6 @@ if IsServer() then
 		end
 	end
 
-	function modifier_arena_hero:OnAttackStart(keys)
-		local parent = self:GetParent()
-		if keys.attacker == parent and keys.target:IsCustomRune() then
-			parent:Stop()
-			ExecuteOrderFromTable({
-				UnitIndex = parent:GetEntityIndex(),
-				OrderType = DOTA_UNIT_ORDER_MOVE_TO_POSITION,
-				Position = parent:GetAbsOrigin(),
-			})
-		end
-	end
 	function modifier_arena_hero:OnAbilityExecuted(keys)
 		if self:GetParent() == keys.unit then
 			local ability_cast = keys.ability
@@ -137,6 +126,19 @@ if IsServer() then
 			end
 		end
 	end
+
+	function modifier_arena_hero:OnAbilityEndChannel(keys)
+		local ability = keys.ability
+		ability.lastEndTime = GameRules:GetGameTime()
+		local channelFailed = (ability.lastEndTime - ability:GetChannelStartTime() + 0.002 < ability:GetChannelTime())
+		ability.channelFailed = channelFailed
+		if ability.EndChannelListeners then
+			for k, v in pairs(ability.EndChannelListeners) do
+				v(channelFailed)
+			end
+		end
+	end
+
 	function modifier_arena_hero:OnDestroy()
 		if IsValidEntity(self.reflect_stolen_ability) then
 			self.reflect_stolen_ability:RemoveSelf()
