@@ -20,14 +20,24 @@ function FillTips() {
 	}
 }
 
+function shuffle(a) {
+	var j, x, i;
+	for (i = a.length; i; i--) {
+		j = Math.floor(Math.random() * i);
+		x = a[i - 1];
+		a[i - 1] = a[j];
+		a[j] = x;
+	}
+}
+
 function NextTip() {
 	if (ShuffledTipList.length === 0) {
-		ShuffledTipList = JSON.parse(JSON.stringify(TipList));
+		ShuffledTipList = TipList.slice();
 		shuffle(ShuffledTipList);
 	}
-	var shifted = ShuffledTipList.shift();
+	var tip = ShuffledTipList.shift();
 
-	$('#TipLabel').text = shifted.text;
+	$('#TipLabel').text = tip.text;
 }
 
 function Snippet_OptionVoting(voteName, voteData) {
@@ -60,7 +70,7 @@ function Snippet_OptionVoting(voteName, voteData) {
 		})(voteName, variant));
 
 		var label = $.CreatePanel('Label', button, '');
-		label.text = typeof variant === 'string' ? $.Localize('option_voting_' + voteName + '_' + variant) : typeof variant === 'boolean' ? $.Localize(variant ? 'option_yes' : 'option_no') : variant;
+		label.text = typeof variant === 'string' ? $.Localize('option_voting_' + voteName + '_' + variant) : variant;
 
 		var votedataLabel = $.CreatePanel('Label', button, 'vote_data_variant_' + tIndex);
 		votedataLabel.text = '{s:votes}';
@@ -76,9 +86,9 @@ function Snippet_OptionVoting_Recalculate(votePanel, voteData) {
 
 	var total = 0;
 	//var leadingKey;
-	for (var pid in voteData.votes) {
+	for (var playerId in voteData.votes) {
 		total += 1;
-		var vote = voteData.votes[pid];
+		var vote = voteData.votes[playerId];
 		amount[vote] += 1;
 		/*if (leadingKey == null || amount[vote] > voteData.votes[leadingKey]) {
 			leadingKey = vote
@@ -138,29 +148,7 @@ function CheckStartable() {
 	}
 }
 
-var russianLangs = [
-	'russian',
-	'ukrainian',
-	'bulgarian'
-];
-function OnAdsClicked() {
-	var context = $.GetContextPanel();
-	$.Schedule(context.BHasClass('AdsClicked') ? 0 : .35, function() {
-		$.DispatchEvent('ExternalBrowserGoToURL', 'https://angelarenablackstar-ark120202.rhcloud.com/ads/loading_screen/go');
-	});
-	if (!context.BHasClass('AdsClicked')){
-		context.AddClass('AdsClicked');
-		Game.EmitSound('General.CoinsBig');
-		GameEvents.SendCustomGameEventToServer('on_ads_clicked', {
-			source: 'loading_screen'
-		});
-	}
-}
-
-
 (function() {
-	$('#AdsBanner').SetImage('https://angelarenablackstar-ark120202.rhcloud.com/ads/loading_screen/' + (russianLangs.indexOf($.Language()) !== -1 ? 'ru.png' : 'en.png'));
-
 	$('#OptionVotings').RemoveAndDeleteChildren();
 	CheckStartable();
 	FillTips();

@@ -1,3 +1,6 @@
+ModuleLinkLuaModifier(..., "modifier_weather_storm_debuff")
+ModuleLinkLuaModifier(..., "modifier_weather_blizzard_debuff")
+
 function CreateLightningBlot(position)
 	local originalPosition
 	local lightningRodRadius = GetAbilitySpecial("item_lightning_rod", "protection_radius")
@@ -9,8 +12,7 @@ function CreateLightningBlot(position)
 		end
 	end
 
-
-	local aoe = 200
+	local aoe = 125
 	CreateGlobalParticle("particles/units/heroes/hero_zuus/zuus_lightning_bolt.vpcf", function(particle)
 		local lightningSourcePosition = originalPosition and (originalPosition + Vector(0, 0, 1200)) or
 			(position + Vector(RandomInt(-250, 250), RandomInt(-250, 250), 1200))
@@ -20,15 +22,10 @@ function CreateLightningBlot(position)
 	EmitSoundOnLocationWithCaster(position, "Hero_Zuus.LightningBolt", nil)
 
 	GridNav:DestroyTreesAroundPoint(position, aoe, true)
-	local damage = GetDOTATimeInMinutesFull() * RandomInt(220, 300)
+	local duration = 0.2
 	for _,v in ipairs(FindUnitsInRadius(DOTA_TEAM_NEUTRALS, position, nil, aoe, DOTA_UNIT_TARGET_TEAM_BOTH, DOTA_UNIT_TARGET_HERO + DOTA_UNIT_TARGET_BASIC, DOTA_UNIT_TARGET_FLAG_NONE, FIND_ANY_ORDER, false)) do
 		if not v:IsMagicImmune() then
-			ApplyDamage({
-				attacker = GLOBAL_DUMMY,
-				victim = v,
-				damage_type = DAMAGE_TYPE_PURE,
-				damage = damage
-			})
+			v:AddNewModifier(v, nil, "modifier_weather_storm_debuff", { duration = duration })
 		end
 	end
 end
@@ -40,19 +37,11 @@ function CreateCrystalNova(position)
 		ParticleManager:SetParticleControl(particle, 1, Vector(aoe, 2, aoe * 2))
 	end)
 	EmitSoundOnLocationWithCaster(position, "Hero_Crystal.CrystalNova", nil)
-	local damage = 100 + GetDOTATimeInMinutesFull() * RandomInt(50, 180)
-	local duration = 0.4 + ( RandomInt(4, 9) / 10 )
+
+	local duration = 0.4 + (RandomInt(4, 9) / 10)
 	for _,v in ipairs(FindUnitsInRadius(DOTA_TEAM_NEUTRALS, position, nil, aoe, DOTA_UNIT_TARGET_TEAM_BOTH, DOTA_UNIT_TARGET_HERO + DOTA_UNIT_TARGET_BASIC, DOTA_UNIT_TARGET_FLAG_NONE, FIND_ANY_ORDER, false)) do
 		if not v:IsMagicImmune() then
-			ApplyDamage({
-				attacker = GLOBAL_DUMMY,
-				victim = v,
-				damage_type = DAMAGE_TYPE_MAGICAL,
-				damage = damage
-			})
-			v:AddNewModifier(v, nil, "modifier_weather_blizzard_debuff", {
-				duration = duration + RandomInt(1, 6) / 10
-			})
+			v:AddNewModifier(v, nil, "modifier_weather_blizzard_debuff", { duration = duration })
 		end
 	end
 end
@@ -64,7 +53,6 @@ WEATHER_EFFECTS = {
 		recipients = {"rain", "snow"},
 
 		particles = {"particles/arena/weather/sunlight.vpcf"},
-		dummyModifier = "modifier_weather_sunny",
 	},
 	rain = {
 		minDuration = 120,
@@ -75,11 +63,10 @@ WEATHER_EFFECTS = {
 		sounds = {
 			{"Arena.Weather.Rain.Ambient"}
 		},
-		dummyModifier = "modifier_weather_rain",
 	},
 	storm = {
-		minDuration = 7,
-		maxDuration = 15,
+		minDuration = 120,
+		maxDuration = 180,
 		recipients = {"rain", "sunny"},
 
 		isCatastrophe = true,
@@ -89,12 +76,8 @@ WEATHER_EFFECTS = {
 			{"Arena.Weather.Rain.Ambient"},
 			{"lightning.thunder"}
 		},
-		dummyModifier = "modifier_weather_rain",
 		Think = function()
-			local bolts = math.floor(Weather:GetPassedTime()) - 1
-			for _ =  1, bolts do
-				CreateLightningBlot(GetGroundPosition(Vector(RandomInt(-MAP_LENGTH, MAP_LENGTH), RandomInt(-MAP_LENGTH, MAP_LENGTH), 0), nil))
-			end
+			CreateLightningBlot(GetGroundPosition(Vector(RandomInt(-MAP_LENGTH, MAP_LENGTH), RandomInt(-MAP_LENGTH, MAP_LENGTH), 0), nil))
 		end,
 	},
 	snow = {
@@ -107,7 +90,6 @@ WEATHER_EFFECTS = {
 			{"Arena.Weather.Snow.Ambient"},
 			{"Arena.Weather.Snow.Gust", 3},
 		},
-		dummyModifier = "modifier_weather_snow",
 	},
 	blizzard = {
 		minDuration = 60,
@@ -125,11 +107,8 @@ WEATHER_EFFECTS = {
 			{"Arena.Weather.Snow.Gust", 1},
 			{"Arena.Weather.Snow.Gust", 5},
 		},
-		dummyModifier = "modifier_weather_snow",
 		Think = function()
-			if RollPercentage(40) then
-				CreateCrystalNova(GetGroundPosition(Vector(RandomInt(-MAP_LENGTH, MAP_LENGTH), RandomInt(-MAP_LENGTH, MAP_LENGTH), 0), nil))
-			end
+			CreateCrystalNova(GetGroundPosition(Vector(RandomInt(-MAP_LENGTH, MAP_LENGTH), RandomInt(-MAP_LENGTH, MAP_LENGTH), 0), nil))
 		end,
 	}
 	-- particles/rain_fx/econ_weather_sirocco.vpcf

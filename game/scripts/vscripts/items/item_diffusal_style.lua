@@ -29,8 +29,14 @@ function modifier_item_diffusal_style_invulnerability_on_destroy(keys)
 	FindClearSpaceForUnit(caster, caster_origin + RandomVector(100), true)
 	caster.MantaIllusions = {}
 	for i = 1, ability:GetLevelSpecialValueFor("images_count", ability:GetLevel()-1) do
-		local illusion = CreateIllusion(caster, ability, caster_origin + RandomVector(100), ability:GetLevelSpecialValueFor("illusion_damage_percent_incoming", ability:GetLevel()-1), ability:GetLevelSpecialValueFor("illusion_damage_percent_outgoing", ability:GetLevel()-1), ability:GetLevelSpecialValueFor("illusion_duration", ability:GetLevel()-1))
-		illusion:SetForwardVector(caster:GetForwardVector())
+		local illusion = Illusions:create({
+			unit = caster,
+			ability = ability,
+			origin = caster_origin + RandomVector(100),
+			damageIncoming = ability:GetSpecialValueFor("illusion_damage_percent_incoming_tooltip"),
+			damageOutgoing = ability:GetSpecialValueFor("illusion_damage_percent_outgoing_tooltip"),
+			duration = ability:GetSpecialValueFor("illusion_duration"),
+		})
 		table.insert(caster.MantaIllusions, illusion)
 	end
 
@@ -41,6 +47,7 @@ function OnAttackLanded(keys)
 	local caster = keys.caster
 	local target = keys.target
 	local ability = keys.ability
+	if caster:IsIllusion() then return end
 	if not target:IsMagicImmune() and not target:IsInvulnerable() then
 		local manaburn = keys.feedback_mana_burn
 		local manadrain = manaburn * keys.feedback_mana_drain_pct * 0.01
@@ -56,8 +63,8 @@ function OnAttackLanded(keys)
 		ParticleManager:CreateParticle("particles/generic_gameplay/generic_manaburn.vpcf", PATTACH_ABSORIGIN_FOLLOW, target)
 		ParticleManager:CreateParticle("particles/arena/generic_gameplay/generic_manasteal.vpcf", PATTACH_ABSORIGIN_FOLLOW, caster)
 	end
-	
-	if RollPercentage(ability:GetLevelSpecialValueFor("purge_chance_pct", ability:GetLevel() - 1)) then
+
+	if not caster:HasModifier(keys.modifier_cooldown) then
 		ParticleManager:CreateParticle("particles/generic_gameplay/generic_purge.vpcf", PATTACH_ABSORIGIN_FOLLOW, target)
 		caster:EmitSound("DOTA_Item.DiffusalBlade.Activate")
 		if target:IsSummoned() then
@@ -74,5 +81,6 @@ function OnAttackLanded(keys)
 				ability:ApplyDataDrivenModifier(caster, target, keys.modifier_slow, {})
 			end
 		end
+		ability:ApplyDataDrivenModifier(caster, caster, keys.modifier_cooldown, {})
 	end
 end

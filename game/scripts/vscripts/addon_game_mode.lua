@@ -76,6 +76,7 @@ function Precache(context)
 		"particles/neutral_fx/prowler_shaman_stomp_debuff_glow.vpcf",
 		"particles/items_fx/blademail.vpcf",
 		-- Weather
+		"particles/econ/items/antimage/antimage_weapon_basher_ti5_gold/am_basher_manaburn_impact_lightning_gold.vpcf",
 		"particles/econ/items/crystal_maiden/ti7_immortal_shoulder/cm_ti7_immortal_frostbite.vpcf",
 		"particles/econ/items/crystal_maiden/crystal_maiden_cowl_of_ice/maiden_crystal_nova_cowlofice.vpcf",
 	}
@@ -84,15 +85,15 @@ function Precache(context)
 		"models/heroes/earthshaker/totem.vmdl",
 		-- Neutrals
 		"models/heroes/centaur/centaur.vmdl",
-		"models/custom/umbrella_rainbow.vmdl",
 	}
 	local units = {
-		"npc_arena_boss_central",
 		"npc_arena_boss_l1_v1",
 		"npc_arena_boss_l1_v2",
 		"npc_arena_boss_l2_v1",
 		"npc_arena_boss_l2_v2",
 		"npc_arena_boss_freya",
+		"npc_arena_boss_zaken",
+		"npc_arena_boss_cursed_zeld",
 		"npc_arena_healer",
 
 		"npc_arena_boss_kel_thuzad_ghost",
@@ -138,9 +139,6 @@ function Precache(context)
 		end
 		if v.ProjectileModel then
 			table.insert(particles, v.ProjectileModel)
-		end
-		if v.PrecacheAllWearables == 1 then
-			DynamicWearables:PrecacheAllWearablesForHero(context, k)
 		end
 	end
 

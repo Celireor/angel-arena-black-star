@@ -14,22 +14,35 @@ LINKED_ABILITIES = {
 	monkey_king_primal_spring = {"monkey_king_primal_spring_early"},
 }
 
-NOT_MULTICASTABLE_ABILITIES = {
-	"ogre_magi_bloodlust",
-	"ogre_magi_fireblast",
-	"ogre_magi_ignite",
-	"ogre_magi_unrefined_fireblast",
-	"ogre_magi_multicast_arena",
-	"invoker_quas",
-	"invoker_wex",
-	"invoker_exort",
-	"invoker_invoke",
-	"shredder_chakram",
-	"alchemist_unstable_concoction",
-	"alchemist_unstable_concoction_throw",
-	"elder_titan_ancestral_spirit",
-	"elder_titan_return_spirit",
-	"ember_spirit_sleight_of_fist",
+MULTICAST_TYPE_NONE = 0
+MULTICAST_TYPE_SAME = 1 -- Fireblast
+MULTICAST_TYPE_DIFFERENT = 2 -- Ignite
+MULTICAST_TYPE_INSTANT = 3 -- Bloodlust
+MULTICAST_ABILITIES = {
+	ogre_magi_bloodlust = MULTICAST_TYPE_NONE,
+	ogre_magi_fireblast = MULTICAST_TYPE_NONE,
+	ogre_magi_ignite = MULTICAST_TYPE_NONE,
+	ogre_magi_unrefined_fireblast = MULTICAST_TYPE_NONE,
+	ogre_magi_multicast_arena = MULTICAST_TYPE_NONE,
+	invoker_quas = MULTICAST_TYPE_NONE,
+	invoker_wex = MULTICAST_TYPE_NONE,
+	invoker_exort = MULTICAST_TYPE_NONE,
+	invoker_invoke = MULTICAST_TYPE_NONE,
+	shredder_chakram = MULTICAST_TYPE_NONE,
+	alchemist_unstable_concoction = MULTICAST_TYPE_NONE,
+	alchemist_unstable_concoction_throw = MULTICAST_TYPE_NONE,
+	elder_titan_ancestral_spirit = MULTICAST_TYPE_NONE,
+	elder_titan_return_spirit = MULTICAST_TYPE_NONE,
+	ember_spirit_sleight_of_fist = MULTICAST_TYPE_NONE,
+	monkey_king_tree_dance = MULTICAST_TYPE_NONE,
+	monkey_king_primal_spring = MULTICAST_TYPE_NONE,
+	monkey_king_primal_spring_early = MULTICAST_TYPE_NONE,
+
+	terrorblade_conjure_image = MULTICAST_TYPE_INSTANT,
+	terrorblade_reflection = MULTICAST_TYPE_INSTANT,
+	magnataur_empower = MULTICAST_TYPE_INSTANT,
+	oracle_purifying_flames = MULTICAST_TYPE_SAME,
+	vengefulspirit_magic_missile = MULTICAST_TYPE_SAME,
 }
 
 REFRESH_LIST_IGNORE_REFRESHER = {
@@ -73,12 +86,26 @@ REFRESH_LIST_IGNORE_REARM = {
 
 	destroyer_body_reconstruction = true,
 	stargazer_cosmic_countdown = true,
+	faceless_void_chronosphere = true,
+	zuus_thundergods_wrath = true,
+	enigma_black_hole = true,
+	freya_pain_reflection = true,
+	skeleton_king_reincarnation = true,
+	dazzle_shallow_grave = true,
+	zuus_cloud = true,
+	ancient_apparition_ice_blast = true,
+	silencer_global_silence = true,
+	naga_siren_song_of_the_siren = true,
+	slark_shadow_dance = true,
 }
 
 COFFEE_BEAN_NOT_REFRESHABLE = {
 	zuus_cloud = true,
 	monkey_king_boundless_strike = true,
 	dazzle_shallow_grave = true,
+	saitama_push_ups = true,
+	saitama_squats = true,
+	saitama_sit_ups = true,
 }
 
 
@@ -102,6 +129,8 @@ BOSS_BANNED_ABILITIES = {
 SPELL_AMPLIFY_NOT_SCALABLE_MODIFIERS = {
 	zuus_static_field = true,
 	enigma_midnight_pulse = true,
+	enigma_black_hole = true,
+	zaken_stitching_strikes = true,
 	morphling_adaptive_strike_agi = true,
 	nyx_assassin_mana_burn = true,
 	elder_titan_earth_splitter = true,
@@ -118,6 +147,7 @@ SPELL_AMPLIFY_NOT_SCALABLE_MODIFIERS = {
 	centaur_return = true,
 	huskar_life_break = true,
 	item_spirit_helix = true,
+	item_ethereal_blade = true,
 }
 
 OCTARINE_NOT_LIFESTALABLE_ABILITIES = {
@@ -140,13 +170,9 @@ ARENA_NOT_CASTABLE_ABILITIES = {
 PERCENT_DAMAGE_MODIFIERS = {
 }
 
-DISABLE_HELP_ABILITIES = {
-	wisp_tether = true,
-	keeper_of_the_light_recall = true,
-	chen_test_of_faith_teleport = true,
-	oracle_purifying_flames = true,
-	kunkka_x_marks_the_spot = true,
-	bloodseeker_bloodrage = true,
-	bane_nightmare = true,
-	winter_wyvern_cold_embrace = true,
+-- https://dota2.gamepedia.com/Spell_Reflection#Not_reflected_abilities
+SPELL_REFLECT_IGNORED_ABILITIES = {
+	grimstroke_soul_chain = true,
+	morphling_replicate = true,
+	rubick_spell_steal = true,
 }

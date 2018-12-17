@@ -7,17 +7,27 @@ function AbilityHasBehaviorByName(ability_name, behaviorString)
 	local AbilityBehavior = GetKeyValue(ability_name, "AbilityBehavior")
 	if AbilityBehavior then
 		local AbilityBehaviors = string.split(AbilityBehavior, " | ")
-		return table.contains(AbilityBehaviors, behaviorString)
+		return table.includes(AbilityBehaviors, behaviorString)
 	end
 	return false
 end
 
-function CDOTABaseAbility:PreformPrecastActions(unit)
-	return PreformAbilityPrecastActions(unit or self:GetCaster(), self)
+function CDOTABaseAbility:PerformPrecastActions()
+	if self:IsCooldownReady() and self:IsOwnersManaEnough() then
+		self:PayManaCost()
+		self:AutoStartCooldown()
+		--self:UseResources(true, true, true) -- not works with items?
+		return true
+	end
+	return false
 end
 
-function CDOTABaseAbility:IsAbilityMulticastable()
-	return not ability:HasBehavior(DOTA_ABILITY_BEHAVIOR_PASSIVE) and not table.contains(NOT_MULTICASTABLE_ABILITIES, self:GetAbilityName())
+function CDOTABaseAbility:GetMulticastType()
+	local name = self:GetAbilityName()
+	if MULTICAST_ABILITIES[name] then return MULTICAST_ABILITIES[name] end
+	if self:IsToggle() then return MULTICAST_TYPE_NONE end
+	if self:HasBehavior(DOTA_ABILITY_BEHAVIOR_PASSIVE) then return MULTICAST_TYPE_NONE end
+	return self:HasBehavior(DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) and MULTICAST_TYPE_DIFFERENT or MULTICAST_TYPE_SAME
 end
 
 function CDOTABaseAbility:ClearFalseInnateModifiers()
