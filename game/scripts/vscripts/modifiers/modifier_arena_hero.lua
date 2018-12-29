@@ -30,22 +30,21 @@ end
 if IsServer() then
 	function modifier_arena_hero:GetModifierBaseAttackTimeConstant()
 		if self.calculatingBAT then return -1 end
-		self.calculatingBAT = true
 		local parent = self:GetParent()
-		local BAT = parent:GetBaseAttackTime()
 		local AS = parent:GetIncreasedAttackSpeed()
 		local MaxAS = GameRules:GetGameModeEntity():GetMaximumAttackSpeed()
 		if AS < MaxAS then
-			self.calculatingBAT = false
 			return -1
 		end
+		self.calculatingBAT = true
+			self.calculatingBAT = false
+		local BAT = parent:GetBaseAttackTime()
 		local postMaxASReductionFactor = 10
 		local NewBAT = BAT * MaxAS * postMaxASReductionFactor / (AS + (postMaxASReductionFactor - 1) * MaxAS)
 		local MaxBAT = 0.01 * MaxAS
 		if NewBAT < MaxBAT then
 			NewBAT = MaxBAT
 		end
-		self.calculatingBAT = false
 		return NewBAT
 	end
 
