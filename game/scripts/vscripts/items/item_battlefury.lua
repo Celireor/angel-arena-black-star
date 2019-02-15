@@ -34,7 +34,7 @@ end
 
 modifier_item_battlefury_arena = class({
 	IsHidden      = function() return true end,
-	GetAttributes = function() return MODIFIER_ATTRIBUTE_MULTIPLE end,
+	GetAttributes = function() return MODIFIER_ATTRIBUTE_MULTIPLE + MODIFIER_ATTRIBUTE_PERMANENT end,
 	IsPurgable    = function() return false end,
 })
 
@@ -47,16 +47,28 @@ function modifier_item_battlefury_arena:DeclareFunctions()
 	}
 end
 
+function modifier_item_battlefury_arena:OnCreated()
+	self:StoreAbilitySpecials(
+		"bonus_damage",
+		"bonus_health_regen",
+		"bonus_mana_regen",
+		"quelling_bonus_damage_pct",
+		"cleave_damage_percent",
+		"cleave_distance",
+		"cleave_starting_width",
+		"cleave_ending_width")
+end
+
 function modifier_item_battlefury_arena:GetModifierPreAttack_BonusDamage()
-	return self:GetAbility():GetSpecialValueFor("bonus_damage")
+	return self:GetSpecialValueFor("bonus_damage")
 end
 
 function modifier_item_battlefury_arena:GetModifierConstantHealthRegen()
-	return self:GetAbility():GetSpecialValueFor("bonus_health_regen")
+	return self:GetSpecialValueFor("bonus_health_regen")
 end
 
 function modifier_item_battlefury_arena:GetModifierConstantManaRegen()
-	return self:GetAbility():GetSpecialValueFor("bonus_mana_regen")
+	return self:GetSpecialValueFor("bonus_mana_regen")
 end
 
 if IsServer() then
@@ -69,7 +81,7 @@ if IsServer() then
 				ApplyDamage({
 					attacker = attacker,
 					victim = target,
-					damage = keys.damage * ability:GetSpecialValueFor("quelling_bonus_damage_pct") * 0.01,
+					damage = keys.damage * self:GetSpecialValueFor("quelling_bonus_damage_pct") * 0.01,
 					damage_type = DAMAGE_TYPE_PURE,
 					damage_flags = DOTA_DAMAGE_FLAG_NO_SPELL_AMPLIFICATION,
 					ability = ability
@@ -80,10 +92,10 @@ if IsServer() then
 					attacker,
 					target,
 					ability,
-					keys.damage * ability:GetSpecialValueFor("cleave_damage_percent") * 0.01,
-					ability:GetSpecialValueFor("cleave_distance"),
-					ability:GetSpecialValueFor("cleave_starting_width"),
-					ability:GetSpecialValueFor("cleave_ending_width"),
+					keys.damage * self:GetSpecialValueFor("cleave_damage_percent") * 0.01,
+					self:GetSpecialValueFor("cleave_distance"),
+					self:GetSpecialValueFor("cleave_starting_width"),
+					self:GetSpecialValueFor("cleave_ending_width"),
 					self:GetAbility().cleave_pfx
 				)
 			end
