@@ -18,6 +18,7 @@ item_blade_mail_3 = class(item_blade_mail_baseclass)
 modifier_item_blade_mail_arena = class({
 	IsHidden   = function() return true end,
 	IsPurgable = function() return false end,
+	GetAttributes = function() return MODIFIER_ATTRIBUTE_MULTIPLE + MODIFIER_ATTRIBUTE_PERMANENT end,
 })
 
 function modifier_item_blade_mail_arena:DeclareFunctions()
@@ -28,16 +29,24 @@ function modifier_item_blade_mail_arena:DeclareFunctions()
 	}
 end
 
+function modifier_item_blade_mail_arena:OnCreated()
+	self:StoreAbilitySpecials(
+		"bonus_damage",
+		"bonus_armor",
+		"bonus_intellect",
+	)
+end
+
 function modifier_item_blade_mail_arena:GetModifierPreAttack_BonusDamage()
-	return self:GetAbility():GetSpecialValueFor("bonus_damage")
+	return self:GetSpecialValueFor("bonus_damage")
 end
 
 function modifier_item_blade_mail_arena:GetModifierPhysicalArmorBonus()
-	return self:GetAbility():GetSpecialValueFor("bonus_armor")
+	return self:GetSpecialValueFor("bonus_armor")
 end
 
 function modifier_item_blade_mail_arena:GetModifierBonusStats_Intellect()
-	return self:GetAbility():GetSpecialValueFor("bonus_intellect")
+	return self:GetSpecialValueFor("bonus_intellect")
 end
 
 
